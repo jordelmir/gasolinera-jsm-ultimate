@@ -21,3 +21,7 @@ spring:
 app:
   admob:
     fallback_ad_url: "https://google.com/admob/fallback.mp4"
+
+# --- OpenTelemetry Tracing Configuration ---
+management.tracing.sampling.probability=1.0
+management.otlp.tracing.endpoint=http://jaeger:4318/v1/traces

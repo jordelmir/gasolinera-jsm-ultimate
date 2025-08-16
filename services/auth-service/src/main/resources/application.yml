@@ -27,3 +27,7 @@ app:
     provider: ${OTP_PROVIDER:mock}
     length: 6
     expiration-minutes: 5
+
+# --- OpenTelemetry Tracing Configuration ---
+management.tracing.sampling.probability=1.0
+management.otlp.tracing.endpoint=http://jaeger:4318/v1/traces

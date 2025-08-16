@@ -24,6 +24,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-amqp") // RabbitMQ
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation(project(":packages:temp-sdk")) // NEW: Temporary SDK for API clients
+
+    // --- Observability (OpenTelemetry Tracing) ---
+    implementation("io.micrometer:micrometer-tracing-bridge-brave")
+    implementation("io.micrometer:micrometer-tracing-reporter-brave")
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
+
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.flywaydb:flyway-core")
@@ -36,6 +43,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.amqp:spring-rabbit-test")
+    implementation("net.logstash.logback:logstash-logback-encoder:7.4") // For structured JSON logging
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

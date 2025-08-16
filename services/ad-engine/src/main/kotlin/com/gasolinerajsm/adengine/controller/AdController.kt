@@ -8,6 +8,7 @@ import com.gasolinerajsm.adengine.repository.AdImpressionRepository
 import com.gasolinerajsm.adengine.service.AdSelectionService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.slf4j.LoggerFactory
 
 @RestController
 @RequestMapping("/ad")
@@ -15,6 +16,8 @@ class AdController(
     private val adSelectionService: AdSelectionService,
     private val adImpressionRepository: AdImpressionRepository
 ) {
+
+    private val logger = LoggerFactory.getLogger(AdController::class.java)
 
     @PostMapping("/select")
     fun selectAd(@RequestBody request: AdSelectionRequest): ResponseEntity<AdCreativeResponse> {
@@ -31,5 +34,16 @@ class AdController(
         )
         adImpressionRepository.save(adImpression)
         return ResponseEntity.ok().build()
+    }
+
+    @GetMapping("/impressions")
+    fun getImpressions( @RequestParam(required = false) campaignId: Long?): ResponseEntity<List<AdImpression>> {
+        logger.info("Received request to get impressions. CampaignId filter: {}", campaignId ?: "none")
+        val impressions = if (campaignId != null) {
+            adImpressionRepository.findByCampaignId(campaignId)
+        } else {
+            adImpressionRepository.findAll()
+        }
+        return ResponseEntity.ok(impressions)
     }
 }

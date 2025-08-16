@@ -1,61 +1,87 @@
 package com.gasolinerajsm.redemptionservice.application
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.gasolinerajsm.redemptionservice.adapter.out.cdc.Outbox
+import com.gasolinerajsm.redemptionservice.adapter.out.persistence.OutboxRepository
+import com.gasolinerajsm.redemptionservice.domain.aggregate.Redemption
+import com.gasolinerajsm.redemptionservice.domain.event.RedemptionInitiatedEvent
+import com.gasolinerajsm.redemptionservice.domain.repository.RedemptionRepository
+import com.gasolinerajsm.redemptionservice.service.QrSecurityService
+import com.gasolinerajsm.redemptionservice.domain.model.PointsLedgerEntry
+import com.gasolinerajsm.redemptionservice.domain.repository.PointsLedgerRepository
+import com.gasolinerajsm.sdk.adengine.api.AdApi
+import com.gasolinerajsm.sdk.adengine.model.AdSelectionRequest
+import org.slf4j.LoggerFactory
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.Counter
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.data.redis.core.StringRedisTemplate
 import java.util.concurrent.TimeUnit
-// Asumiendo entidades y repositorios de DDD
-import com.gasolinerajsm.redemptionservice.domain.aggregate.Redemption
-import com.gasolinerajsm.redemptionservice.domain.event.RedemptionInitiatedEvent
-import com.gasolinerajsm.redemptionservice.adapter.out.cdc.Outbox
-import com.gasolinerajsm.redemptionservice.adapter.out.persistence.OutboxRepository
-import com.gasolinerajsm.redemptionservice.service.QrSecurityService
-import com.gasolinerajsm.redemptionservice.client.AdEngineClient
 
 @Service
 class RedemptionService(
     private val qrSecurityService: QrSecurityService,
     private val redemptionRepository: RedemptionRepository,
-    private val outboxRepository: OutboxRepository, // Repositorio para la tabla outbox
+    private val outboxRepository: OutboxRepository,
     private val objectMapper: ObjectMapper,
-    private val adEngineClient: AdEngineClient,
-    private val redisTemplate: StringRedisTemplate
+    private val adApi: AdApi, // Refactored to use AdApi SDK
+    private val redisTemplate: StringRedisTemplate,
+    private val meterRegistry: MeterRegistry,
+    private val pointsLedgerRepository: PointsLedgerRepository
 ) {
+
+    private val redemptionsSuccessfulTotal: Counter = meterRegistry.counter("redemptions_successful_total")
+    private val redemptionsFailedTotal: Counter = meterRegistry.counter("redemptions_failed_total")
+
+    private val logger = LoggerFactory.getLogger(RedemptionService::class.java)
 
     @Transactional
     fun initiateRedemption(command: RedeemCommand): RedemptionResult {
-        // 1. Verificar firma ECDSA, nonce, geofencing (lógica movida a un Value Object)
-        val verifiedQr = qrSecurityService.validateAndParseToken(command.qrToken)
+        logger.info("Initiating redemption for userId: {} with QR token: {}", command.userId, command.qrToken)
+
+        val verifiedQr = try {
+            qrSecurityService.validateAndParseToken(command.qrToken)
+        } catch (e: Exception) {
+            logger.error("QR token verification failed for user {}: {}", command.userId, e.message)
+            redemptionsFailedTotal.increment()
+            throw e
+        }
+        
+        logger.debug("QR token successfully verified for nonce: {}", verifiedQr.n)
 
         val redemption = Redemption.initiate(
             userId = command.userId,
             qr = verifiedQr
         )
 
-        // 2. Seleccionar anuncio
-        val adSelectionRequest = com.gasolinerajsm.redemptionservice.client.AdSelectionRequest(
-            userId = command.userId.toLong(), // Assuming userId can be converted to Long
-            stationId = verifiedQr.s.toLong() // Assuming stationId can be converted to Long
+        // 2. Seleccionar anuncio usando el SDK
+        val adSelectionRequest = AdSelectionRequest(
+            user_id = command.userId,
+            station_id = verifiedQr.s,
+            context = emptyMap() // Opcional: añadir contexto si es necesario
         )
-        val adCreative = adEngineClient.selectAd(adSelectionRequest)
-            ?: throw IllegalStateException("Failed to select ad") // Handle null response
+        val adCreative = adApi.selectAd(adSelectionRequest)
+            ?: run {
+                logger.error("Failed to select ad for userId: {}", command.userId)
+                redemptionsFailedTotal.increment()
+                throw IllegalStateException("Failed to select ad")
+            }
 
-        // 3. Persistir el estado del Agregado
         redemptionRepository.save(redemption)
+        logger.info("Redemption aggregate saved with ID: {}", redemption.id)
 
-        // 4. Almacenar datos de sesión en Redis para confirmación posterior
+        // 4. Almacenar datos de sesión en Redis
         val sessionId = redemption.id.toString()
         val sessionData = mapOf(
             "userId" to command.userId,
-            "campaignId" to adCreative.campaignId.toString(),
-            "creativeId" to adCreative.creativeId
+            "impressionUrl" to adCreative.impression_url
         )
         redisTemplate.opsForHash<String, String>().putAll(sessionId, sessionData)
-        redisTemplate.expire(sessionId, 10, TimeUnit.MINUTES) // Session expires in 10 minutes
+        redisTemplate.expire(sessionId, 10, TimeUnit.MINUTES)
+        logger.info("Session data stored in Redis for sessionId: {}", sessionId)
 
-        // 5. Crear el evento y guardarlo en la tabla outbox EN LA MISMA TRANSACCIÓN
         val event = RedemptionInitiatedEvent(
             redemptionId = redemption.id,
             userId = redemption.userId,
@@ -68,35 +94,49 @@ class RedemptionService(
             payload = objectMapper.writeValueAsString(event)
         )
         outboxRepository.save(outboxEvent)
+        logger.info("RedemptionInitiatedEvent saved to outbox with ID: {}", outboxEvent.id)
 
-        // 6. La respuesta al cliente incluye la URL del anuncio
+        redemptionsSuccessfulTotal.increment()
+        
+        // 6. Devolver resultado
+        // Nota: campaignId y creativeId no están en el nuevo AdCreative.
+        // Se omite por ahora. Si son necesarios, se debe actualizar el AdEngine.
         return RedemptionResult(
             redemptionId = redemption.id,
             status = "PENDING_AD_VIEW",
-            adUrl = adCreative.adUrl,
-            campaignId = adCreative.campaignId,
-            creativeId = adCreative.creativeId
+            adUrl = adCreative.creative_url,
+            campaignId = 0, // Dato no disponible
+            creativeId = "" // Dato no disponible
         )
     }
-    
+
     @Transactional
     fun confirmAdWatched(request: ConfirmAdRequest): ConfirmAdResponse {
+        logger.info("Confirming ad watched for sessionId: {}", request.sessionId)
         val sessionId = request.sessionId
         val sessionData = redisTemplate.opsForHash<String, String>().entries(sessionId)
 
-        val userId = sessionData["userId"] ?: throw IllegalStateException("Session data not found for $sessionId")
-        val campaignId = sessionData["campaignId"]?.toLong() ?: throw IllegalStateException("Campaign ID not found in session for $sessionId")
-        val creativeId = sessionData["creativeId"] ?: throw IllegalStateException("Creative ID not found in session for $sessionId")
+        val userId = sessionData["userId"] ?: run { logger.warn("Session data not found for sessionId: {}", sessionId); throw IllegalStateException("Session data not found for $sessionId") }
+        val impressionUrl = sessionData["impressionUrl"] ?: run { logger.warn("Impression URL not found in session for sessionId: {}", sessionId); throw IllegalStateException("Impression URL not found in session for $sessionId") }
 
-        // 1. Registrar la impresión del anuncio en ad-engine
-        adEngineClient.recordImpression(userId.toLong(), campaignId, creativeId)
+        logger.info("Recording ad impression for userId: {}", userId)
+        adApi.recordImpression(impressionUrl)
 
-        // 2. Proceder con la lógica de acreditación de puntos (ej. marcar nonce como usado, acreditar puntos)
-        // TODO: Implement actual point accreditation logic
-        println("Ad watched confirmed for session: $sessionId. User: $userId, Campaign: $campaignId")
+        val pointsToCredit = 25
+        val redemptionId = UUID.fromString(sessionId)
 
-        // Clean up session data from Redis
+        val pointsEntry = PointsLedgerEntry(
+            userId = userId,
+            pointsCredited = pointsToCredit,
+            redemptionId = redemptionId
+        )
+        pointsLedgerRepository.save(pointsEntry)
+        logger.info("Points credited: {} for userId: {} and redemptionId: {}", pointsToCredit, userId, redemptionId)
+
+        logger.info("Ad watched confirmed and points accredited for sessionId: {}", sessionId)
+
         redisTemplate.delete(sessionId)
+        logger.info("Session data deleted from Redis for sessionId: {}", sessionId)
 
         return ConfirmAdResponse(balance = 100) // Mock balance
     }
