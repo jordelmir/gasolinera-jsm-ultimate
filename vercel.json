@@ -1,4 +1,3 @@
 {
-  "installCommand": "npm install",
-  "framework": null
+  "installCommand": "npm install"
 }
