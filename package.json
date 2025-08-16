@@ -11,9 +11,9 @@
     "nx": "nx"
   },
   "devDependencies": {
-    "@nx/cli": "19.2.1",
-    "@nx/workspace": "19.2.1",
-    "nx": "19.2.1",
+    "@nx/cli": "latest",
+    "@nx/workspace": "latest",
+    "nx": "latest",
     "typescript": "~5.4.0"
   }
 }
