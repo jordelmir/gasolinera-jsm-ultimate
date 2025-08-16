@@ -31,6 +31,28 @@ services:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: password
 
+  jaeger: # NUEVO: Para tracing distribuido
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686" # UI
+      - "14268:14268" # API
+
+  debezium-connect: # NUEVO: Para el patrón Outbox
+    image: debezium/connect:2.5
+    ports:
+      - "8083:8083"
+    depends_on:
+      - postgres
+      - rabbitmq # Assuming Kafka is not directly in docker-compose, but RabbitMQ is for events
+    environment:
+      BOOTSTRAP_SERVERS: 'kafka:9092' # Placeholder, assuming Kafka is managed externally or will be added
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      STATUS_STORAGE_TOPIC: connect_statuses
+    volumes:
+      - ./ops/debezium:/kafka/connect
+
   api-gateway:
     build:
       context: ./services/api-gateway
@@ -43,8 +65,10 @@ services:
       - station-service
       - ad-engine
       - raffle-service
+      - jaeger # NUEVO
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317 # NUEVO
 
   auth-service:
     build:
@@ -53,11 +77,13 @@ services:
     depends_on:
       - postgres
       - redis
+      - jaeger # NUEVO
     environment:
       - POSTGRES_HOST=postgres
       - REDIS_HOST=redis
       - JWT_SECRET=${JWT_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317 # NUEVO
 
   redemption-service:
     build:
@@ -67,11 +93,14 @@ services:
       - postgres
       - redis
       - rabbitmq
+      - jaeger # NUEVO
     environment:
       - POSTGRES_HOST=postgres
       - REDIS_HOST=redis
       - RABBITMQ_HOST=rabbitmq
       - QR_SIGNATURE_SECRET=${QR_SIGNATURE_SECRET}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/puntog # NUEVO
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317 # NUEVO
 
   station-service:
     build:
@@ -79,8 +108,10 @@ services:
     container_name: station-service
     depends_on:
       - postgres
+      - jaeger # NUEVO
     environment:
       - POSTGRES_HOST=postgres
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317 # NUEVO
 
   ad-engine:
     build:
@@ -88,8 +119,10 @@ services:
     container_name: ad-engine
     depends_on:
       - postgres
+      - jaeger # NUEVO
     environment:
       - POSTGRES_HOST=postgres
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317 # NUEVO
 
   raffle-service:
     build:
@@ -97,8 +130,10 @@ services:
     container_name: raffle-service
     depends_on:
       - postgres
+      - jaeger # NUEVO
     environment:
       - POSTGRES_HOST=postgres
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317 # NUEVO
 
 volumes:
   postgres_data:

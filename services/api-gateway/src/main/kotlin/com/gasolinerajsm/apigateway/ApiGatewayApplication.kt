@@ -8,5 +8,12 @@ import org.springframework.boot.runApplication
 class ApiGatewayApplication
 
 fun main(args: Array<String>) {
-    runApplication<ApiGatewayApplication>(*args)
+    try {
+        runApplication<ApiGatewayApplication>(*args)
+    } catch (e: Exception) {
+        System.err.println("API Gateway application failed to start: ${e.message}")
+        e.printStackTrace()
+        // In a real app, you might want to log this to a proper logging system
+        // and potentially trigger alerts.
+    }
 }

@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: redemption-service
+  namespace: argocd
+spec:
+  project: punto-g
+  source:
+    repoURL: 'https://github.com/tu-usuario/punto-g.git' # La URL de tu repo
+    path: infra/helm/punto-g-service
+    targetRevision: HEAD
+    helm:
+      valueFiles:
+        - values-redemption.yaml
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: punto-g
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

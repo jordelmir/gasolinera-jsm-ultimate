@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: debezium/postgres:15-alpine
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-puntog}
+      POSTGRES_USER: ${POSTGRES_USER:-puntog}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command: >
+      postgres -c wal_level=logical
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+  debezium:
+    image: debezium/connect:2.5
+    container_name: debezium
+    ports:
+      - "8083:8083"
+    depends_on:
+      - kafka
+      - postgres
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      STATUS_STORAGE_TOPIC: connect_statuses
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+    container_name: auth-service
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "8081:8080" # Mapeado a un puerto diferente para evitar colisiones
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - JWT_SECRET=${JWT_SECRET:-default-jwt-secret-key-that-is-long-enough}
+      # ...otras variables de entorno para auth-service
+
+  redemption-service:
+    build:
+      context: ./services/redemption-service
+    container_name: redemption-service
+    depends_on:
+      - postgres
+      - kafka
+    ports:
+      - "8082:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - QR_PUBLIC_KEY=${QR_PUBLIC_KEY:-default-public-key}
+      # ...otras variables de entorno para redemption-service
+
+  ad-engine:
+    build:
+      context: ./services/ad-engine
+    container_name: ad-engine
+    depends_on:
+      - postgres
+    ports:
+      - "8083:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - AD_FALLBACK_URL=${AD_FALLBACK_URL:-http://example.com/fallback-ad.mp4}
+      # ...otras variables de entorno para ad-engine
+
+volumes:
+  postgres_data:
+  redis_data:
