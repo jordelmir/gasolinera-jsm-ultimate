@@ -1,0 +1,30 @@
+# Default values for gasolinera-jsm.
+
+replicaCount: 1
+
+image:
+  repository: your-ecr-repo-url # This will be overridden by CI/CD
+  pullPolicy: IfNotPresent
+  tag: "latest" # This will be overridden by CI/CD
+
+# Global configuration accessible via a ConfigMap
+config:
+  POSTGRES_HOST: "postgres-rds-endpoint"
+  REDIS_HOST: "elasticache-endpoint"
+  RABBITMQ_HOST: "rabbitmq-endpoint"
+
+# Per-service configurations
+services:
+  api-gateway:
+    port: 8080
+    serviceType: LoadBalancer
+  auth-service:
+    port: 8081
+  redemption-service:
+    port: 8082
+  station-service:
+    port: 8083
+  ad-engine:
+    port: 8084
+  raffle-service:
+    port: 8085

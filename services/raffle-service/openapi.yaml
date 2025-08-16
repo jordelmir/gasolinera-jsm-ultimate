@@ -1,0 +1,49 @@
+
+openapi: 3.0.3
+info:
+  title: Raffle Service
+  version: 1.0.0
+paths:
+  /raffles:
+    post:
+      summary: Create a new raffle period (Admin)
+      responses:
+        '201':
+          description: Raffle created and Merkle root generated
+  /raffles/{id}/draw:
+    post:
+      summary: Draw a winner for the raffle (Admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DrawRequest'
+      responses:
+        '200':
+          description: Winner drawn successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RaffleWinner'
+
+components:
+  schemas:
+    DrawRequest:
+      type: object
+      properties:
+        seed_value:
+          type: string
+          description: "Optional. If not provided, fetched from external source."
+    RaffleWinner:
+      type: object
+      properties:
+        user_id:
+          type: string
+        point_id:
+          type: string

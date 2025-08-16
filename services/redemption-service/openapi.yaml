@@ -1,0 +1,68 @@
+
+openapi: 3.0.3
+info:
+  title: Redemption Service
+  version: 1.0.0
+paths:
+  /redeem:
+    post:
+      summary: Redeem a QR Code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RedeemRequest'
+      responses:
+        '200':
+          description: Successful redemption, ad is pending
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedeemResponse'
+  /redeem/confirm-ad:
+    post:
+      summary: Confirm Ad Watched
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmAdRequest'
+      responses:
+        '200':
+          description: Points credited successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmAdResponse'
+
+components:
+  schemas:
+    RedeemRequest:
+      type: object
+      properties:
+        qr_token:
+          type: string
+        gps:
+          type: string
+          example: "9.9199,-84.0402"
+    RedeemResponse:
+      type: object
+      properties:
+        session_id:
+          type: string
+        ad_payload:
+          type: object
+        provisional_points:
+          type: integer
+    ConfirmAdRequest:
+      type: object
+      properties:
+        session_id:
+          type: string
+    ConfirmAdResponse:
+      type: object
+      properties:
+        balance:
+          type: integer

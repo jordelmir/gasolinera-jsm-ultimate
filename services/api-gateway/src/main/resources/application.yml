@@ -1,0 +1,30 @@
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/**
+        - id: redemption-service
+          uri: lb://redemption-service
+          predicates:
+            - Path=/redeem/**
+        # Add other routes as services are created
+        # - id: station-service
+        #   uri: lb://station-service
+        #   predicates:
+        #     - Path=/stations/**
+
+# Service discovery for docker-compose will use container names
+# For Kubernetes, this would use service names e.g., http://auth-service:8081
+auth-service:
+  uri: http://auth-service:8081
+redemption-service:
+  uri: http://redemption-service:8082

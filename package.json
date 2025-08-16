@@ -1,0 +1,19 @@
+{
+  "name": "gasolinera-jsm",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "nx": "nx"
+  },
+  "devDependencies": {
+    "@nx/cli": "18.3.4",
+    "@nx/workspace": "18.3.4",
+    "nx": "18.3.4",
+    "typescript": "~5.4.0"
+  }
+}

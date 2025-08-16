@@ -1,0 +1,29 @@
+
+server:
+  port: 8082
+
+spring:
+  application:
+    name: redemption-service
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:puntog}
+    username: ${POSTGRES_USER:puntog}
+    password: ${POSTGRES_PASSWORD:changeme}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+  redis:
+    host: ${REDIS_HOST:localhost}
+
+app:
+  qr:
+    secret: ${QR_SIGNATURE_SECRET}
+  geofence-radius-meters: ${GEOfENCE_RADIUS_METERS:50}

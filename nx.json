@@ -1,0 +1,17 @@
+{
+  "targetDefaults": {
+    "build": {
+      "cache": true,
+      "outputs": ["{projectRoot}/dist", "{projectRoot}/build"]
+    },
+    "lint": {
+      "cache": true
+    },
+    "test": {
+      "cache": true
+    }
+  },
+  "affected": {
+    "defaultBase": "main"
+  }
+}

@@ -1,0 +1,44 @@
+# This is a generic template. In a real scenario, you would have
+# templates for each service (deployment, service, ingress, etc.)
+
+{{- range .Values.services }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .name }}
+  labels:
+    app: {{ .name }}
+spec:
+  replicas: {{ .replicaCount | default $.Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .name }}
+    spec:
+      containers:
+        - name: {{ .name }}
+          image: "{{ $.Values.image.repository }}/{{ .name }}:{{ $.Values.image.tag }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .port | default 8080 }}
+          envFrom:
+            - configMapRef:
+                name: {{ $.Release.Name }}-config
+          env:
+            {{- toYaml .env | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}-service
+spec:
+  selector:
+    app: {{ .name }}
+  ports:
+    - protocol: TCP
+      port: {{ .port | default 8080 }}
+      targetPort: {{ .port | default 8080 }}
+{{- end }}

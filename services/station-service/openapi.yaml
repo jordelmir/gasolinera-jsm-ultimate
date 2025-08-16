@@ -1,0 +1,58 @@
+
+openapi: 3.0.3
+info:
+  title: Station Service
+  version: 1.0.0
+paths:
+  /stations:
+    get:
+      summary: Get stations, optionally by location
+      parameters:
+        - name: near
+          in: query
+          schema:
+            type: string
+            example: "9.93,-84.08"
+        - name: radius
+          in: query
+          schema:
+            type: integer
+            example: 5000
+      responses:
+        '200':
+          description: A list of stations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Station'
+  /stations/{id}:
+    get:
+      summary: Get a station by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Station details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Station'
+
+components:
+  schemas:
+    Station:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        location:
+          type: string
+          example: "9.93,-84.08"

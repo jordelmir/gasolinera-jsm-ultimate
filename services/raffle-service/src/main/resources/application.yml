@@ -1,0 +1,16 @@
+
+server:
+  port: 8085
+
+spring:
+  application:
+    name: raffle-service
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:puntog}
+    username: ${POSTGRES_USER:puntog}
+    password: ${POSTGRES_PASSWORD:changeme}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true

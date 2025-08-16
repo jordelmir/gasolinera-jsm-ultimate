@@ -1,0 +1,23 @@
+
+server:
+  port: 8084
+
+spring:
+  application:
+    name: ad-engine
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:puntog}
+    username: ${POSTGRES_USER:puntog}
+    password: ${POSTGRES_PASSWORD:changeme}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+
+app:
+  admob:
+    fallback_ad_url: "https://google.com/admob/fallback.mp4"
