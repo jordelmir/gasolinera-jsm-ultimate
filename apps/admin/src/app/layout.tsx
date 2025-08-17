@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import dynamic from "next/dynamic";
+import ClientOnly from "../components/ClientOnly";
 
 const DynamicProviders = dynamic(() => import("./providers"), { ssr: false });
 
@@ -20,9 +21,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <DynamicProviders>
-          {children}
-        </DynamicProviders>
+        <ClientOnly>
+          <DynamicProviders>
+            {children}
+          </DynamicProviders>
+        </ClientOnly>
       </body>
     </html>
   );
