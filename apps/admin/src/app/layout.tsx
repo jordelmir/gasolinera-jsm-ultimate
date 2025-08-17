@@ -4,7 +4,7 @@ import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata: Metadata = {
+export const metadata: Metadata = {
   title: "Admin Dashboard - Gasolinera JSM",
   description: "Manage stations, campaigns, and raffles",
 };
