@@ -73,4 +73,5 @@ tasks.withType<Test> {
 
 tasks.getByName<BootJar>("bootJar") {
     archiveFileName.set("ad-engine.jar")
+    mainClassName = "com.gasolinerajsm.adengine.AdEngineApplicationKt"
 }

@@ -15,9 +15,9 @@
     "nx": "nx"
   },
   "devDependencies": {
-    "@nx/next": "^19.0.0",
-    "@nx/workspace": "^19.0.0",
-    "nx": "^19.0.0",
-    "typescript": "~5.4.0"
+    "@nx/next": "^21.4.0",
+    "@nx/workspace": "^21.4.0",
+    "nx": "^21.4.0",
+    "typescript": "~5.9.2"
   }
 }
