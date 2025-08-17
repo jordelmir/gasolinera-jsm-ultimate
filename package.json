@@ -8,6 +8,10 @@
     "services/*"
   ],
   "scripts": {
+    "vercel-build": "npx nx build admin-dashboard --prod && npx nx build advertiser-portal --prod",
+    "start": "nx serve",
+    "build": "nx build",
+    "test": "nx test",
     "nx": "nx"
   },
   "devDependencies": {
