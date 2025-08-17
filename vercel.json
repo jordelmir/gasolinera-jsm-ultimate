@@ -1,5 +1,20 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npx nx build admin --prod",
-  "installCommand": "npm ci"
+  "version": 2,
+  "installCommand": "npm install",
+  "builds": [
+    {
+      "src": "apps/admin/package.json",
+      "use": "@vercel/next",
+      "config": {
+        "outputDirectory": "dist/apps/admin"
+      }
+    },
+    {
+      "src": "apps/advertiser/package.json",
+      "use": "@vercel/next",
+      "config": {
+        "outputDirectory": "dist/apps/advertiser"
+      }
+    }
+  ]
 }
