@@ -1,6 +1,4 @@
-// @ts-check
-
-const { composePlugins, withNx } = require(' @nx/next');
+const { withNx } = require(' @nx/next/with-nx');
 
 /**
  * @Type {import(' @nx/next/plugins/with-nx').WithNxOptions}
@@ -11,11 +9,9 @@ const nextConfig = {
     // See: https://github.com/gregberge/svgr
     svgr: false,
   },
+  // Tu configuración de Next.js va aquí si tienes alguna.
+  // Por ejemplo:
+  // reactStrictMode: true,
 };
 
-const plugins = [
-  // Add more Next.js plugins to this list if needed.
-  withNx,
-];
-
-module.exports = composePlugins(...plugins)(nextConfig);
+module.exports = withNx(nextConfig);
