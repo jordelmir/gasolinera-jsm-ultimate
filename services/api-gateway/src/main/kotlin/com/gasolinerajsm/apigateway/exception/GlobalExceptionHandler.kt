@@ -3,36 +3,61 @@ package com.gasolinerajsm.apigateway.exception
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import java.time.LocalDateTime
+
+data class ErrorResponse(
+    val timestamp: LocalDateTime,
+    val status: Int,
+    val error: String,
+    val message: String,
+    val path: String? = null
+)
 
 @ControllerAdvice
 class GlobalExceptionHandler {
 
     private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 
-    @ExceptionHandler(Exception::class)
-    fun handleGenericException(ex: Exception): ResponseEntity<Map<String, Any>> {
-        logger.error("An unexpected error occurred: {}", ex.message, ex)
-        val body = mapOf(
-            "timestamp" to LocalDateTime.now(),
-            "status" to HttpStatus.INTERNAL_SERVER_ERROR.value(),
-            "error" to "Internal Server Error",
-            "message" to "An unexpected error occurred. Please try again later."
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleValidationExceptions(ex: MethodArgumentNotValidException): ResponseEntity<ErrorResponse> {
+        val errors = ex.bindingResult.fieldErrors
+            .map { it.defaultMessage }
+            .filterNotNull()
+            .joinToString("; ")
+        logger.warn("Validation error: {}", errors)
+        val errorResponse = ErrorResponse(
+            timestamp = LocalDateTime.now(),
+            status = HttpStatus.BAD_REQUEST.value(),
+            error = "Validation Error",
+            message = errors
         )
-        return ResponseEntity(body, HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
     }
 
-    @ExceptionHandler(InvalidRequestException::class)
-    fun handleSpecificApiException(ex: InvalidRequestException): ResponseEntity<Map<String, Any>> {
-        logger.warn("Invalid request: {}", ex.message)
-        val body = mapOf(
-            "timestamp" to LocalDateTime.now(),
-            "status" to HttpStatus.BAD_REQUEST.value(),
-            "error" to "Bad Request",
-            "message" to ex.message
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<ErrorResponse> {
+        logger.warn("Illegal argument: {}", ex.message)
+        val errorResponse = ErrorResponse(
+            timestamp = LocalDateTime.now(),
+            status = HttpStatus.BAD_REQUEST.value(),
+            error = "Bad Request",
+            message = ex.message ?: "Invalid argument provided"
         )
-        return ResponseEntity(body, HttpStatus.BAD_REQUEST)
+        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(Exception::class)
+    fun handleGenericException(ex: Exception): ResponseEntity<ErrorResponse> {
+        logger.error("An unexpected error occurred: {}", ex.message, ex)
+        val errorResponse = ErrorResponse(
+            timestamp = LocalDateTime.now(),
+            status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            error = "Internal Server Error",
+            message = "An unexpected error occurred. Please try again later."
+        )
+        return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 }

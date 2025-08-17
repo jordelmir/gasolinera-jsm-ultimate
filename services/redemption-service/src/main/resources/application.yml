@@ -1,4 +1,3 @@
-
 server:
   port: 8082
 
@@ -22,6 +21,21 @@ spring:
     host: ${RABBITMQ_HOST:localhost}
   redis:
     host: ${REDIS_HOST:localhost}
+
+  cloud:
+    vault:
+      enabled: true
+      scheme: http
+      host: localhost
+      port: 8200
+      authentication: TOKEN
+      token: ${VAULT_TOKEN:myroottoken}
+      kv:
+        enabled: true
+        backend: secret
+        profile-separator: /
+        default-context: application
+        application-name: ${spring.application.name}
 
 app:
   qr:

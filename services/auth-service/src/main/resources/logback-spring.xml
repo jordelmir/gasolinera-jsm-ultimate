@@ -1,16 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
 
-    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    <appender name="jsonConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdc>true</includeMdc>
+            <includeContext>true</includeContext>
+            <customFields>{"service_name":"auth-service"}</customFields>
+        </encoder>
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="JSON_CONSOLE"/>
+        <appender-ref ref="jsonConsoleAppender"/>
     </root>
-
-    <logger name="com.gasolinerajsm" level="DEBUG"/>
-
 </configuration>

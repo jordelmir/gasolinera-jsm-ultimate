@@ -1,30 +1,89 @@
-# Default values for gasolinera-jsm.
-
 replicaCount: 1
 
 image:
-  repository: your-ecr-repo-url # This will be overridden by CI/CD
+  repository: <YOUR_ECR_REPO_URL>/<SERVICE_NAME>
   pullPolicy: IfNotPresent
-  tag: "latest" # This will be overridden by CI/CD
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
 
-# Global configuration accessible via a ConfigMap
-config:
-  POSTGRES_HOST: "postgres-rds-endpoint"
-  REDIS_HOST: "elasticache-endpoint"
-  RABBITMQ_HOST: "rabbitmq-endpoint"
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
 
-# Per-service configurations
-services:
-  api-gateway:
-    port: 8080
-    serviceType: LoadBalancer
-  auth-service:
-    port: 8081
-  redemption-service:
-    port: 8082
-  station-service:
-    port: 8083
-  ad-engine:
-    port: 8084
-  raffle-service:
-    port: 8085
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use. If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+env:
+  # Example:
+  # - name: MY_ENV_VAR
+  #   value: "my-value"
+
+secrets:
+  # Example:
+  # - name: MY_SECRET_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: my-key

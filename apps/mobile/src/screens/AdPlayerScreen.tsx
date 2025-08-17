@@ -1,104 +1,91 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button, ActivityIndicator, Alert } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { confirmAdWatched } from '../api/apiClient'; // Import the API client function
-// import { Video } from 'expo-av'; // You would use a video player here
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Button, ActivityIndicator } from 'react-native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { WebView } from 'react-native-webview';
+import { confirmAdWatched } from '../api/apiClient';
+import Toast from 'react-native-toast-message';
 
-interface AdPlayerScreenRouteParams {
-  adUrl: string;
-  redemptionId: string;
-}
+const AD_DURATION_SECONDS = 15;
+
+type AdPlayerScreenRouteProp = RouteProp<{ params: { adUrl: string; redemptionId: string } }, 'params'>;
 
 export default function AdPlayerScreen() {
-  const navigation = useNavigation();
-  const route = useRoute();
-  const { adUrl, redemptionId } = route.params as AdPlayerScreenRouteParams;
+  const navigation = useNavigation<any>();
+  const route = useRoute<AdPlayerScreenRouteProp>();
+  const { adUrl, redemptionId } = route.params;
 
-  const [adDuration, setAdDuration] = useState(10); // Simulate 10-second ad
-  const [timeLeft, setTimeLeft] = useState(adDuration);
-  const [progress, setProgress] = useState(0); // New state for progress
-  const [loading, setLoading] = useState(true);
-  const [adFinished, setAdFinished] = useState(false);
-  const [confirmingAd, setConfirmingAd] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(AD_DURATION_SECONDS);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Simulate ad loading
-    const loadAd = async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
-      setLoading(false);
-      // In a real app, you'd load the video here
+    intervalRef.current = setInterval(() => {
+      setTimeLeft((prevTime) => prevTime - 1);
+    }, 1000);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
-    loadAd();
   }, []);
 
   useEffect(() => {
-    if (!loading && !adFinished && timeLeft > 0) {
-      const timer = setTimeout(() => {
-        setTimeLeft(timeLeft - 1);
-        // Calculate progress based on simulated ad
-        const newProgress = (adDuration - (timeLeft - 1)) / adDuration;
-        setProgress(newProgress);
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && !adFinished) {
-      setAdFinished(true);
+    if (timeLeft <= 0) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
       handleAdFinished();
     }
-  }, [timeLeft, loading, adFinished, redemptionId, adDuration]); // Add adDuration to dependencies
+  }, [timeLeft]);
 
   const handleAdFinished = async () => {
-    setConfirmingAd(true);
+    setIsConfirming(true);
     try {
-      const response = await confirmAdWatched(redemptionId);
-      if (response.success) {
-        Alert.alert('Anuncio Terminado', `¡Puntos acreditados! Balance: ${response.data?.balance}`);
-        navigation.navigate('Home'); // Navigate back to home or a success screen
-      } else {
-        Alert.alert('Error', response.error?.message || 'No se pudieron acreditar los puntos.');
-      }
+      await confirmAdWatched(redemptionId);
+      Toast.show({
+        type: 'success',
+        text1: '¡Recompensa Obtenida!',
+        text2: 'Has ganado puntos por ver el anuncio.',
+      });
+      navigation.navigate('Home'); // Navigate back to home or a success screen
     } catch (error: any) {
-      Alert.alert('Error de Red', error.message || 'No se pudo conectar con el servidor para confirmar el anuncio.');
+      Toast.show({
+        type: 'error',
+        text1: 'Error de Confirmación',
+        text2: error.message,
+      });
+      navigation.goBack(); // Go back if ad confirmation fails
     } finally {
-      setConfirmingAd(false);
+      setIsConfirming(false);
     }
   };
 
-  const handleSkipAd = () => {
-    Alert.alert('Anuncio Saltado', 'Debes ver el anuncio completo para ganar puntos.');
-    navigation.goBack(); // Go back if ad is skipped
-  };
-
-  if (loading || confirmingAd) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#FFFFFF" />
-        <Text style={styles.loadingText}>{confirmingAd ? "Confirmando anuncio..." : "Cargando anuncio..."}</Text>
-      </View>
-    );
-  }
+  const progress = ((AD_DURATION_SECONDS - timeLeft) / AD_DURATION_SECONDS) * 100;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Reproduciendo Anuncio</Text>
-      <Text style={styles.adUrl}>URL: {adUrl}</Text>
-      
-      {/* Placeholder for video player */}
-      <View style={styles.videoPlayerPlaceholder}>
-        <Text style={styles.videoText}>Video del Anuncio Aquí</Text>
-        <Text style={styles.videoText}>Tiempo restante: {timeLeft}s</Text>
-        {/* Progress Bar */}
-        <View style={styles.progressBarContainer}>
-            <View style={[styles.progressBar, { width: `${progress * 100}%` }]} />
-        </View>
+      <View style={styles.header}>
         <Text style={styles.timerText}>Tu recompensa estará disponible en {timeLeft} segundos...</Text>
+        <View style={styles.progressBarContainer}>
+          <View style={[styles.progressBar, { width: `${progress}%` }]} />
+        </View>
       </View>
-
-      {!adFinished && (
-        <Button title="Saltar Anuncio (No recomendado)" onPress={handleSkipAd} />
-      )}
-      {adFinished && (
-        <Button title="Anuncio Terminado. Continuar" onPress={() => navigation.navigate('Home')} />
-      )}
+      <WebView 
+        source={{ uri: adUrl }}
+        style={styles.webview}
+        onError={(e) => Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: `No se pudo cargar el anuncio: ${e.nativeEvent.description}`,
+        })}
+      />
+      {isConfirming &&
+        <View style={styles.loadingOverlay}>
+            <ActivityIndicator size="large" color="#FFFFFF" />
+            <Text style={styles.loadingText}>Confirmando recompensa...</Text>
+        </View>
+      }
     </View>
   );
 }
@@ -106,53 +93,40 @@ export default function AdPlayerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000',
+  },
+  header: {
+    padding: 15,
+    backgroundColor: '#1a1a1a',
+  },
+  timerText: {
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 10,
+    fontSize: 16,
+  },
+  progressBarContainer: {
+    height: 8,
+    backgroundColor: '#444',
+    borderRadius: 4,
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#4CAF50',
+    borderRadius: 4,
+  },
+  webview: {
+    flex: 1,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.7)',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'black',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    color: 'white',
-    marginBottom: 20,
-  },
-  adUrl: {
-    color: 'gray',
-    marginBottom: 30,
-  },
-  videoPlayerPlaceholder: {
-    width: '100%',
-    height: 200,
-    backgroundColor: '#333',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  videoText: {
-    color: 'white',
-    fontSize: 18,
   },
   loadingText: {
     color: 'white',
     marginTop: 10,
     fontSize: 16,
-  },
-  progressBarContainer: {
-    width: '90%',
-    height: 10,
-    backgroundColor: '#555',
-    borderRadius: 5,
-    marginTop: 10,
-    overflow: 'hidden',
-  },
-  progressBar: {
-    height: '100%',
-    backgroundColor: '#4CAF50', // Green color for progress
-    borderRadius: 5,
-  },
-  timerText: {
-    color: 'white',
-    fontSize: 16,
-    marginTop: 10,
   },
 });

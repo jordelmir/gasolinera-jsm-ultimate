@@ -1,44 +1,75 @@
-name: Deploy to Staging
+name: CD to EKS
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types:
+      - completed
+
+env:
+  AWS_REGION: us-east-1 # Replace with your desired AWS region
+  EKS_CLUSTER_NAME: gasolinera-jsm-cluster # Replace with your EKS cluster name
+  ECR_REPOSITORY: <YOUR_ECR_REPO_URL> # Replace with your ECR repository URL
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: "${{ github.event.workflow_run.conclusion == 'success' }}"
+    permissions:
+      id-token: write # This is required for aws-actions/configure-aws-credentials@v4
+      contents: read # This is required for actions/checkout@v3
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::<YOUR_AWS_ACCOUNT_ID>:role/<YOUR_GITHUB_ACTIONS_OIDC_ROLE> # Replace with your OIDC role ARN
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+      - name: Update Kubeconfig
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
 
-      - name: Set up Helm
+      - name: Install Helm
         uses: azure/setup-helm@v3
         with:
-          version: v3.10.0
+          version: 'v3.8.1' # Specify the Helm version
 
-      - name: Build and push Docker images
-        # This step would iterate through services and apps, build them,
-        # and push to ECR. For brevity, this is a placeholder.
+      - name: Deploy Microservices with Helm
         run: |
-          echo "Building and pushing images..."
-          # Example for one service:
-          # docker build -t ${{ steps.login-ecr.outputs.registry }}/auth-service:${{ github.sha }} ./services/auth-service
-          # docker push ${{ steps.login-ecr.outputs.registry }}/auth-service:${{ github.sha }}
-
-      - name: Deploy to Kubernetes
-        run: |
-          helm upgrade --install gasolinera-jsm ./infra/helm/gasolinera-jsm \
-            --namespace staging \
+          # Deploy auth-service
+          helm upgrade --install auth-service ./infra/helm/gasolinera-jsm/charts/auth-service \
+            --set image.repository=${{ env.ECR_REPOSITORY }}/auth-service \
             --set image.tag=${{ github.sha }} \
-            --set image.repository=${{ steps.login-ecr.outputs.registry }}
+            --namespace default # Or your desired namespace
+
+          # Deploy redemption-service
+          helm upgrade --install redemption-service ./infra/helm/gasolinera-jsm/charts/redemption-service \
+            --set image.repository=${{ env.ECR_REPOSITORY }}/redemption-service \
+            --set image.tag=${{ github.sha }} \
+            --namespace default
+
+          # Deploy ad-engine
+          helm upgrade --install ad-engine ./infra/helm/gasolinera-jsm/charts/ad-engine \
+            --set image.repository=${{ env.ECR_REPOSITORY }}/ad-engine \
+            --set image.tag=${{ github.sha }} \
+            --namespace default
+
+          # Deploy raffle-service
+          helm upgrade --install raffle-service ./infra/helm/gasolinera-jsm/charts/raffle-service \
+            --set image.repository=${{ env.ECR_REPOSITORY }}/raffle-service \
+            --set image.tag=${{ github.sha }} \
+            --namespace default
+
+          # Deploy api-gateway
+          helm upgrade --install api-gateway ./infra/helm/gasolinera-jsm/charts/api-gateway \
+            --set image.repository=${{ env.ECR_REPOSITORY }}/api-gateway \
+            --set image.tag=${{ github.sha }} \
+            --namespace default
+
+          # Deploy station-service
+          helm upgrade --install station-service ./infra/helm/gasolinera-jsm/charts/station-service \
+            --set image.repository=${{ env.ECR_REPOSITORY }}/station-service \
+            --set image.tag=${{ github.sha }} \
+            --namespace default

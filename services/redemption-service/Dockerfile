@@ -1,34 +1,30 @@
-# Build Stage
-FROM gradle:8.8.0-jdk17 AS build
-WORKDIR /app
+# Etapa 1: Compilación
+FROM gradle:8.8.0-jdk17-alpine AS build
+WORKDIR /home/gradle/project
 
-# Copy Gradle wrapper and settings file from the root of the project
-# Assuming the Docker build context is the project root
-COPY gradlew .
-COPY gradle/ gradle/
-COPY settings.gradle.kts .
-
-# Copy the specific service's files
+# Copiar solo los archivos de build para cachear dependencias
+COPY build.gradle.kts settings.gradle.kts ./ 
 COPY services/redemption-service/build.gradle.kts ./services/redemption-service/
-COPY services/redemption-service/src ./services/redemption-service/src/
 
-# Build the application JAR for the specific service
-WORKDIR /app/services/redemption-service
-RUN ../../gradlew bootJar
+# Descargar dependencias
+RUN gradle :services:redemption-service:dependencies
 
-# Final Stage
-FROM eclipse-temurin:17-jre-jammy
+# Copiar el resto del código fuente
+COPY . .
+
+# Construir la aplicación
+RUN gradle :services:redemption-service:build -x test
+
+# Etapa 2: Producción
+FROM openjdk:17-alpine
+
 WORKDIR /app
 
-# Create a non-root user
-RUN groupadd --system appuser && useradd --system --gid appuser appuser
-USER appuser
+# Copiar el JAR construido desde la etapa de compilación
+COPY --from=build /home/gradle/project/services/redemption-service/build/libs/*.jar app.jar
 
-# Copy the built JAR from the build stage
-COPY --from=build /app/services/redemption-service/build/libs/*.jar app.jar
-
-# Expose the application port
+# Exponer el puerto en el que corre la aplicación
 EXPOSE 8080
 
-# Run the application
+# Comando para ejecutar la aplicación
 ENTRYPOINT ["java", "-jar", "app.jar"]

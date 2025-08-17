@@ -37,6 +37,19 @@ services:
       - "16686:16686" # UI
       - "14268:14268" # API
 
+  vault:
+    image: hashicorp/vault:1.15.4
+    container_name: vault
+    ports:
+      - "8200:8200"
+      - "8201:8201"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: myroottoken
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+    cap_add:
+      - IPC_LOCK
+    command: "server -dev -dev-root-token-id=myroottoken -dev-listen-address=0.0.0.0:8200"
+
   debezium-connect:
     image: debezium/connect:2.5
     ports:
@@ -58,8 +71,6 @@ services:
       context: .
       dockerfile: services/api-gateway/Dockerfile
     container_name: api-gateway
-    env_file:
-      - .env
     ports:
       - "8080:8080"
     depends_on:
@@ -69,31 +80,39 @@ services:
       - ad-engine
       - raffle-service
       - jaeger
+      - vault
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+      - VAULT_TOKEN=myroottoken
+    command: >
+      sh -c "
+        sleep 10 && # Wait for Vault to be ready
+        vault login myroottoken &&
+        vault kv put secret/application jwt_secret=supersecretkey jwt_refresh_secret=supersecretrefreshkey qr_signature_secret=qrsignaturesecret fallback_ad_url=http://example.com/fallback.mp4 postgres_user=puntog postgres_password=changeme postgres_db=puntog redis_host=redis rabbitmq_host=rabbitmq &&
+        java -jar /app/app.jar
+      "
 
   auth-service:
     build:
       context: .
       dockerfile: services/auth-service/Dockerfile
     container_name: auth-service
-    env_file:
-      - .env
     ports:
       - "8081:8080"
     depends_on:
       - postgres
       - redis
       - jaeger
+      - vault
+    environment:
+      - VAULT_TOKEN=myroottoken
 
   redemption-service:
     build:
       context: .
       dockerfile: services/redemption-service/Dockerfile
     container_name: redemption-service
-    env_file:
-      - .env
     ports:
       - "8082:8080"
     depends_on:
@@ -101,49 +120,49 @@ services:
       - redis
       - rabbitmq
       - jaeger
+      - vault
+    environment:
+      - VAULT_TOKEN=myroottoken
 
   station-service:
     build:
       context: .
       dockerfile: services/station-service/Dockerfile
     container_name: station-service
-    env_file:
-      - .env
     depends_on:
       - postgres
       - jaeger
+      - vault
     environment:
-      - POSTGRES_HOST=postgres
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+      - VAULT_TOKEN=myroottoken
 
   ad-engine:
     build:
       context: .
       dockerfile: services/ad-engine/Dockerfile
     container_name: ad-engine
-    env_file:
-      - .env
     ports:
       - "8084:8080"
     depends_on:
       - postgres
       - jaeger
+      - vault
+    environment:
+      - VAULT_TOKEN=myroottoken
 
   raffle-service:
     build:
       context: .
       dockerfile: services/raffle-service/Dockerfile
     container_name: raffle-service
-    env_file:
-      - .env
     ports:
       - "8085:8080"
     depends_on:
       - postgres
       - jaeger
+      - vault
     environment:
-      - POSTGRES_HOST=postgres
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+      - VAULT_TOKEN=myroottoken
 
 volumes:
   postgres_data:

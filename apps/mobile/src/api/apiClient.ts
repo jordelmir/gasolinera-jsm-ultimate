@@ -1,120 +1,117 @@
-import { ApiResponse, Product } from '@gasolinera-jsm/shared';
+// Asume que el token de autenticación se gestiona globalmente (ej. Zustand, Context)
+let authToken: string | null = null;
 
-const API_BASE_URL = 'http://localhost:8080'; // TODO: Make configurable
+// Función para establecer el token desde la app
+export const setAuthToken = (token: string | null) => {
+  authToken = token;
+};
+
+const API_BASE_URL = 'http://192.168.1.100:8080/api/v1'; // Reemplazar con la IP del API Gateway
 
 /**
- * Simulates fetching products from an API.
- * In a real application, this would make an actual network request.
+ * Realiza una petición fetch y maneja errores de forma centralizada.
+ * @param endpoint El endpoint de la API al que llamar.
+ * @param options Opciones de la petición fetch.
+ * @returns La respuesta JSON.
+ * @throws {Error} Si la respuesta de la red no es OK.
  */
-export async function fetchProducts(): Promise<ApiResponse<Product[]>> {
-  try {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+async function apiFetch(endpoint: string, options: RequestInit = {}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
 
-    // Simulate a successful response
-    const mockProducts: Product[] = [
-      { id: 'prod1', name: 'Gasolina Regular', price: 1.20, unit: 'gal' },
-      { id: 'prod2', name: 'Gasolina Premium', price: 1.50, unit: 'gal' },
-      { id: 'prod3', name: 'Diesel', price: 1.00, unit: 'gal' },
-    ];
-
-    // Simulate a random error for demonstration
-    if (Math.random() < 0.2) { // 20% chance of error
-      throw new Error('Simulated network error');
-    }
-
-    return {
-      success: true,
-      data: mockProducts,
-    };
-  } catch (error: any) {
-    console.error("Error fetching products:", error);
-    return {
-      success: false,
-      data: null,
-      error: {
-        message: error.message || 'An unknown error occurred',
-        code: 'FETCH_ERROR',
-      },
-    };
+  if (authToken) {
+    headers['Authorization'] = `Bearer ${authToken}`;
   }
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    let errorMessage = `Error: ${response.status} ${response.statusText}`;
+    try {
+      const errorBody = await response.json();
+      errorMessage = errorBody.message || errorMessage;
+    } catch (e) {
+      // El cuerpo del error no era JSON, usar el mensaje de estado
+    }
+    throw new Error(errorMessage);
+  }
+
+  // Si la respuesta no tiene contenido (ej. 204 No Content), devolver null
+  if (response.status === 204) {
+    return null;
+  }
+
+  return response.json();
 }
 
-export async function requestOtp(phone: string): Promise<ApiResponse<null>> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/auth/otp/request`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ phone }),
-    });
+/**
+ * Solicita un código OTP para un número de teléfono.
+ */
+export const requestOtp = (phone: string): Promise<void> => {
+  return apiFetch('/auth/otp/request', {
+    method: 'POST',
+    body: JSON.stringify({ phone }),
+  });
+};
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      return {
-        success: false,
-        data: null,
-        error: {
-          message: errorData.message || 'Failed to request OTP',
-          code: response.status.toString(),
-        },
-      };
-    }
+/**
+ * Verifica un código OTP y devuelve un token de acceso.
+ */
+export const verifyOtp = (phone: string, code: string): Promise<{ accessToken: string }> => {
+  return apiFetch('/auth/otp/verify', {
+    method: 'POST',
+    body: JSON.stringify({ phone, code }),
+  });
+};
 
-    return {
-      success: true,
-      data: null,
-    };
-  } catch (error: any) {
-    console.error("Error requesting OTP:", error);
-    return {
-      success: false,
-      data: null,
-      error: {
-        message: error.message || 'Network error',
-        code: 'NETWORK_ERROR',
-      },
-    };
-  }
-}
+/**
+ * Envía un código QR para iniciar el proceso de redención.
+ */
+export const redeemQrCode = (qrCode: string): Promise<{ adUrl: string; redemptionId: string }> => {
+  return apiFetch('/redemptions', {
+    method: 'POST',
+    body: JSON.stringify({ qrCode }),
+  });
+};
 
-export async function verifyOtp(phone: string, code: string): Promise<ApiResponse<{ accessToken: string }>> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/auth/otp/verify`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ phone, code }),
-    });
+/**
+ * Confirma que un anuncio ha sido visto.
+ */
+export const confirmAdWatched = (redemptionId: string): Promise<void> => {
+  return apiFetch('/redemptions/confirm', {
+    method: 'POST',
+    body: JSON.stringify({ redemptionId }),
+  });
+};
 
-    const responseData = await response.json();
+// --- Raffles --- //
+export type Raffle = {
+  id: number;
+  period: string;
+  merkleRoot: string;
+  status: 'OPEN' | 'CLOSED' | 'DRAWN';
+  drawAt?: string; // ISO date string
+  externalSeed?: string;
+  winnerEntryId?: string;
+};
 
-    if (!response.ok) {
-      return {
-        success: false,
-        data: null,
-        error: {
-          message: responseData.message || 'Failed to verify OTP',
-          code: response.status.toString(),
-        },
-      };
-    }
+export type RaffleWinner = {
+  id: number;
+  raffleId: number;
+  userId: string;
+  winningPointId: string;
+  prize: string;
+};
 
-    return {
-      success: true,
-      data: { accessToken: responseData.accessToken },
-    };
-  } catch (error: any) {
-    console.error("Error verifying OTP:", error);
-    return {
-      success: false,
-      data: null,
-      error: {
-        message: error.message || 'Network error',
-        code: 'NETWORK_ERROR',
-      },
-    };
-  }
-}
+export const getRaffles = (): Promise<Raffle[]> => {
+  return apiFetch('/raffles');
+};
+
+export const getRaffleWinner = (raffleId: number): Promise<RaffleWinner> => {
+  return apiFetch(`/raffles/${raffleId}/winner`);
+};
