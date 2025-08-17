@@ -52,7 +52,7 @@ export default function AdvertiserDashboardLayout({
           {children}
         </main>
       </div>
-    </CSR> {/* <--- CIERRE DEL ENVOLTORIO AQUÍ */}
     </div>
+    </CSR> {/* <--- CIERRE DEL ENVOLTORIO AQUÍ */}
   );
 }
