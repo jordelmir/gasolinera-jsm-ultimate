@@ -1,21 +1,16 @@
-// This would be the main dashboard page after login
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// Ruta: apps/admin/src/app/dashboard/page.tsx
 
-export default function Dashboard() {
+export default function DashboardPage() {
+  // TODO: Añadir lógica de protección de ruta.
+  // Si el usuario no está autenticado (no hay token), se le debe redirigir a /login.
+  // Usaremos un Hook o Context para gestionar esto en el futuro.
+
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$1,234.56</div>
-          </CardContent>
-        </Card>
-        {/* Add more cards for other stats */}
+    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+      <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+        <h1 className="text-2xl font-bold">Dashboard Principal</h1>
+        {/* Aquí construiremos el dashboard real en la Fase 2 */}
       </div>
-    </div>
+    </main>
   );
 }
