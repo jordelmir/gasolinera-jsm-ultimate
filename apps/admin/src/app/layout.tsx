@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Providers from "./providers";
+import dynamic from "next/dynamic";
+
+const DynamicProviders = dynamic(() => import("./providers"), { ssr: false });
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,9 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Providers>
+        <DynamicProviders>
           {children}
-        </Providers>
+        </DynamicProviders>
       </body>
     </html>
   );
