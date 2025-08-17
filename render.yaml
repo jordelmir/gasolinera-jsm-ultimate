@@ -73,4 +73,30 @@ services:
           name: redis-cache-puntog
           property: connectionString
 
-  # (Aquí añadiríamos las definiciones para ad-engine y raffle-service, siguiendo el mismo patrón)
+  - type: pserv
+        name: ad-engine
+        plan: free
+        runtime: docker
+        dockerfilePath: ./services/ad-engine/Dockerfile
+        dockerContext: .
+        envVars:
+          - fromGroup: puntog-secrets
+          - key: POSTGRES_HOST
+            fromService:
+              type: pserv
+              name: postgres-db-puntog
+              property: host
+
+      - type: pserv
+        name: raffle-service
+        plan: free
+        runtime: docker
+        dockerfilePath: ./services/raffle-service/Dockerfile
+        dockerContext: .
+        envVars:
+          - fromGroup: puntog-secrets
+          - key: POSTGRES_HOST
+            fromService:
+              type: pserv
+              name: postgres-db-puntog
+              property: host
