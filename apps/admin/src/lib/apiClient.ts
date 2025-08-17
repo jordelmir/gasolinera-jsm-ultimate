@@ -1,3 +1,4 @@
+
 import { useAuthStore } from "@/store/authStore"; // Assuming a zustand store for auth
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1';
@@ -9,9 +10,9 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8
 async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const token = useAuthStore.getState().token;
 
-  const headers = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...options.headers,
+    ...(options.headers as Record<string, string>),
   };
 
   if (token) {
