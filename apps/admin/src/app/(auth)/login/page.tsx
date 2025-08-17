@@ -23,7 +23,7 @@ export default function AdminLoginPage() {
     setIsLoading(true);
     try {
       const { token, refreshToken, user } = await loginAdmin(email, password);
-      setAuth(token, user); // Assuming your store handles the user object
+      login(token, user); // Assuming your store handles the user object
       toast.success("Login successful!");
       router.push('/dashboard');
     } catch (err: any) {
