@@ -15,7 +15,7 @@ const Label = (props) => <label {...props} style={{ display: 'block', marginBott
 
 export default function LoginPage() {
   const router = useRouter();
-  const setAuth = useAuthStore((state) => state.setAuth);
+  const login = useAuthStore((state) => state.login);
   const [email, setEmail] = useState('anunciante@tosty.com');
   const [password, setPassword] = useState('tosty123');
   const [isLoading, setIsLoading] = useState(false);
