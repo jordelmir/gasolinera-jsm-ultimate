@@ -24,7 +24,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const { token } = await loginAdvertiser(email, password);
-      setAuth(token);
+      login(token, null);
       toast.success("Login successful!");
       router.push('/dashboard');
     } catch (err: any) {
