@@ -1,3 +1,6 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "root": "apps/admin",
+  "buildCommand": "npx nx build admin --prod",
   "installCommand": "npm install"
 }
