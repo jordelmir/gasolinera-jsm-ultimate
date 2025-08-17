@@ -6,7 +6,9 @@ import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import ScannerScreen from './src/screens/ScannerScreen';
 import RedemptionScreen from './src/screens/RedemptionScreen';
-import AdPlayerScreen from './src/screens/AdPlayerScreen'; // Import AdPlayerScreen
+import AdPlayerScreen from './src/screens/AdPlayerScreen';
+import RafflesScreen from './src/screens/RafflesScreen';
+import Toast from 'react-native-toast-message';
 
 const Stack = createNativeStackNavigator();
 
@@ -50,8 +52,10 @@ export default function App() {
           {/* Other screens that require authentication can be nested within the authenticated flow */}
           <Stack.Screen name="Scanner" component={ScannerScreen} />
           <Stack.Screen name="Redemption" component={RedemptionScreen} />
-          <Stack.Screen name="AdPlayer" component={AdPlayerScreen} /> {/* Add AdPlayerScreen */}
+          <Stack.Screen name="AdPlayer" component={AdPlayerScreen} />
+          <Stack.Screen name="Raffles" component={RafflesScreen} />
         </Stack.Navigator>
+        <Toast />
       </NavigationContainer>
     </ErrorBoundary>
   );

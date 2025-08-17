@@ -1,10 +1,12 @@
 package com.gasolinerajsm.authservice.controller
 
+import com.gasolinerajsm.authservice.dto.AdminLoginRequest
 import com.gasolinerajsm.authservice.dto.OtpRequest
 import com.gasolinerajsm.authservice.dto.OtpVerifyRequest
 import com.gasolinerajsm.authservice.dto.TokenResponse
 import com.gasolinerajsm.authservice.service.JwtService
 import com.gasolinerajsm.authservice.service.UserService
+import jakarta.validation.Valid
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -23,7 +25,7 @@ class AuthController(
     private val logger = LoggerFactory.getLogger(AuthController::class.java)
 
     @PostMapping("/otp/request")
-    fun requestOtp(@RequestBody request: OtpRequest): ResponseEntity<Void> {
+    fun requestOtp(@Valid @RequestBody request: OtpRequest): ResponseEntity<Void> {
         val otpCode = (100000..999999).random().toString() // Generate 6-digit code
         redisTemplate.opsForValue().set(request.phone, otpCode, 5, TimeUnit.MINUTES) // Store for 5 mins
         logger.info("OTP requested for phone {}: {}", request.phone, otpCode) // For manual testing
@@ -31,7 +33,7 @@ class AuthController(
     }
 
     @PostMapping("/otp/verify")
-    fun verifyOtp(@RequestBody request: OtpVerifyRequest): ResponseEntity<Any> {
+    fun verifyOtp(@Valid @RequestBody request: OtpVerifyRequest): ResponseEntity<Any> {
         val storedOtp = redisTemplate.opsForValue().get(request.phone)
 
         if (storedOtp == null || storedOtp != request.code) {
@@ -49,5 +51,44 @@ class AuthController(
         logger.info("Tokens generated for user ID {}", user.id)
         return ResponseEntity.ok(TokenResponse(accessToken, refreshToken))
     }
-}
 
+    @PostMapping("/login/admin")
+    fun adminLogin(@Valid @RequestBody request: AdminLoginRequest): ResponseEntity<Any> {
+        // HARDCODED credentials for now as per requirements
+        val adminEmail = "admin@puntog.com"
+        val adminPass = "admin123"
+
+        if (request.email != adminEmail || request.pass != adminPass) {
+            logger.warn("Admin login failed for email: {}", request.email)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("message" to "Invalid credentials"))
+        }
+
+        val adminId = "admin-system-01"
+        val adminRoles = listOf("ADMIN", "USER")
+        val accessToken = jwtService.generateAccessToken(adminId, adminRoles)
+        val refreshToken = jwtService.generateRefreshToken(adminId)
+
+        logger.info("Admin tokens generated for admin ID {}", adminId)
+        return ResponseEntity.ok(TokenResponse(accessToken, refreshToken))
+    }
+
+    @PostMapping("/login/advertiser")
+    fun advertiserLogin(@Valid @RequestBody request: AdminLoginRequest): ResponseEntity<Any> {
+        // In a real system, this would check the advertiser table
+        val advertiserEmail = "anunciante@tosty.com"
+        val advertiserPass = "tosty123"
+
+        if (request.email != advertiserEmail || request.pass != advertiserPass) {
+            logger.warn("Advertiser login failed for email: {}", request.email)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("message" to "Invalid credentials"))
+        }
+
+        val advertiserId = "adv-tosty-01" // This would come from the database
+        val advertiserRoles = listOf("ADVERTISER")
+        val accessToken = jwtService.generateAccessToken(advertiserId, advertiserRoles)
+        val refreshToken = jwtService.generateRefreshToken(advertiserId)
+
+        logger.info("Advertiser tokens generated for advertiser ID {}", advertiserId)
+        return ResponseEntity.ok(TokenResponse(accessToken, refreshToken))
+    }
+}

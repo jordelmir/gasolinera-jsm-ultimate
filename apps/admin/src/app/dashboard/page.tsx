@@ -1,16 +1,91 @@
-// Ruta: apps/admin/src/app/dashboard/page.tsx
+
+"use client";
+
+import { useEffect, useState } from "react";
+import { DollarSign, Package, Users } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getTodaySummary } from "@/lib/apiClient";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+interface SummaryData {
+  totalRevenue: number;
+  pointsRedeemed: number;
+  adImpressions: number;
+}
 
 export default function DashboardPage() {
-  // TODO: Añadir lógica de protección de ruta.
-  // Si el usuario no está autenticado (no hay token), se le debe redirigir a /login.
-  // Usaremos un Hook o Context para gestionar esto en el futuro.
+  const [summary, setSummary] = useState<SummaryData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchSummary = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getTodaySummary();
+        setSummary(data);
+      } catch (err: any) {
+        setError(err.message);
+        toast.error(`Error loading dashboard summary: ${err.message}`);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchSummary();
+  }, []);
+
+  if (isLoading) {
+    return <p>Cargando métricas del dashboard...</p>;
+  }
+
+  if (error) {
+    return <p className="text-red-500">Error: {error}</p>;
+  }
 
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-      <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-        <h1 className="text-2xl font-bold">Dashboard Principal</h1>
-        {/* Aquí construiremos el dashboard real en la Fase 2 */}
-      </div>
-    </main>
+    <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">
+            Ingresos por Publicidad (Hoy)
+          </CardTitle>
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">${summary?.totalRevenue.toFixed(2)}</div>
+          <p className="text-xs text-muted-foreground">
+            Datos en tiempo real
+          </p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">
+            Puntos G Canjeados (Hoy)
+          </CardTitle>
+          <Package className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">+{summary?.pointsRedeemed.toLocaleString()}</div>
+          <p className="text-xs text-muted-foreground">
+            Datos en tiempo real
+          </p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Impresiones de Anuncios (Hoy)</CardTitle>
+          <Users className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">+{summary?.adImpressions.toLocaleString()}</div>
+          <p className="text-xs text-muted-foreground">
+            Datos en tiempo real
+          </p>
+        </CardContent>
+      </Card>
+      <ToastContainer position="bottom-right" />
+    </div>
   );
 }

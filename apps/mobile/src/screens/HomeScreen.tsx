@@ -6,16 +6,21 @@ interface HomeScreenProps {
   onLogout: () => void;
 }
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
+const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, onLogout }) => {
   const handleLogout = () => {
     onLogout();
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to Gasolinera JSM!</Text>
-      <Text style={styles.subtitle}>You are logged in.</Text>
-      <Button title="Logout" onPress={handleLogout} />
+      <Text style={styles.title}>¡Bienvenido a Gasolinera JSM!</Text>
+      <Text style={styles.subtitle}>Has iniciado sesión.</Text>
+      
+      <Button title="Escanear QR" onPress={() => navigation.navigate('Scanner')} />
+      <View style={{ marginVertical: 10 }} />
+      <Button title="Ver Sorteos" onPress={() => navigation.navigate('Raffles')} />
+      <View style={{ marginVertical: 10 }} />
+      <Button title="Cerrar Sesión" onPress={handleLogout} />
     </View>
   );
 };
@@ -30,10 +35,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     marginBottom: 10,
+    fontWeight: 'bold',
   },
   subtitle: {
     fontSize: 18,
     marginBottom: 20,
+    color: '#666',
   },
 });
 

@@ -1,4 +1,3 @@
-
 plugins {
     id("org.springframework.boot") version "3.2.3"
     id("io.spring.dependency-management") version "1.1.4"
@@ -20,14 +19,31 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.cloud:spring-cloud-starter-vault-config:4.1.3")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.flywaydb:flyway-core")
-    implementation("org.flywaydb:flyway-database-postgresql")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-prometheus")
+    implementation("io.micrometer:micrometer-tracing-bridge-brave")
+    implementation("io.micrometer:micrometer-tracing-reporter-brave")
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    // Basic hashing library
-    implementation("com.google.guava:guava:32.1.3-jre")
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-database-postgresql")
+    implementation("net.logstash.logback:logstash-logback-encoder:7.4")
+
+    // Database
     runtimeOnly("org.postgresql:postgresql")
+
+    // HTTP Client for external API (e.g., Bitcoin block hash)
+    implementation("org.springframework.boot:spring-boot-starter-webflux") // For WebClient
+
+    // Merkle Tree Library (example, might need to implement custom)
+    // implementation("com.github.merkletree:merkletree:1.0.0") // Placeholder, check for actual library
+
+    // Tests
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
@@ -39,5 +55,5 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 }
 
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
-    archiveFileName.set("app.jar")
+    archiveFileName.set("raffle-service.jar")
 }

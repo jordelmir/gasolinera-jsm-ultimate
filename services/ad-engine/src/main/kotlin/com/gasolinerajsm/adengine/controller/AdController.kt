@@ -6,6 +6,7 @@ import com.gasolinerajsm.adengine.dto.ImpressionRequest
 import com.gasolinerajsm.adengine.model.AdImpression
 import com.gasolinerajsm.adengine.repository.AdImpressionRepository
 import com.gasolinerajsm.adengine.service.AdSelectionService
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.slf4j.LoggerFactory
@@ -20,13 +21,13 @@ class AdController(
     private val logger = LoggerFactory.getLogger(AdController::class.java)
 
     @PostMapping("/select")
-    fun selectAd(@RequestBody request: AdSelectionRequest): ResponseEntity<AdCreativeResponse> {
+    fun selectAd(@Valid @RequestBody request: AdSelectionRequest): ResponseEntity<AdCreativeResponse> {
         val adCreative = adSelectionService.selectAd(request)
         return ResponseEntity.ok(adCreative)
     }
 
     @PostMapping("/impression")
-    fun recordImpression(@RequestBody request: ImpressionRequest): ResponseEntity<Void> {
+    fun recordImpression(@Valid @RequestBody request: ImpressionRequest): ResponseEntity<Void> {
         val adImpression = AdImpression(
             userId = request.userId,
             campaignId = request.campaignId,

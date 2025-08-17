@@ -1,76 +1,104 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { requestOtp, verifyOtp } from '../api/apiClient';
+import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
+import { requestOtp, verifyOtp, setAuthToken } from '../api/apiClient';
+import { useUserStore } from '../store/userStore';
+import Toast from 'react-native-toast-message';
 
-interface LoginScreenProps {
-  navigation: any;
-  onLogin: (token: string) => void;
-}
-
-const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, onLogin }) => {
+// La navegación ahora se manejaría en un navigator raíz que observa el estado del userStore
+const LoginScreen = () => {
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [otpRequested, setOtpRequested] = useState(false);
   const [loading, setLoading] = useState(false);
+  const login = useUserStore((state) => state.login);
 
   const handleRequestOtp = async () => {
     if (!phone) {
-      Alert.alert('Error', 'Please enter a phone number.');
+      Toast.show({
+        type: 'error',
+        text1: 'Entrada Inválida',
+        text2: 'Por favor, introduce un número de teléfono.',
+      });
       return;
     }
     setLoading(true);
-    const response = await requestOtp(phone);
-    setLoading(false);
-
-    if (response.success) {
-      Alert.alert('OTP Request', `OTP requested for ${phone}. Check console.`);
+    try {
+      await requestOtp(phone);
       setOtpRequested(true);
-    } else {
-      Alert.alert('Error', response.error?.message || 'Failed to request OTP.');
+      Toast.show({
+        type: 'success',
+        text1: 'OTP Enviado',
+        text2: `Se ha enviado un código a ${phone}.`,
+      });
+    } catch (error: any) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: error.message,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleVerifyOtp = async () => {
-    if (!phone || !otp) {
-      Alert.alert('Error', 'Please enter phone number and OTP.');
+    if (!otp) {
+      Toast.show({
+        type: 'error',
+        text1: 'Entrada Inválida',
+        text2: 'Por favor, introduce el código OTP.',
+      });
       return;
     }
     setLoading(true);
-    const response = await verifyOtp(phone, otp);
-    setLoading(false);
-
-    if (response.success && response.data?.accessToken) {
-      Alert.alert('Success', 'Logged in successfully!');
-      onLogin(response.data.accessToken);
-    } else {
-      Alert.alert('Error', response.error?.message || 'Failed to verify OTP.');
+    try {
+      const { accessToken } = await verifyOtp(phone, otp);
+      setAuthToken(accessToken); // Configura el token para futuras llamadas de API
+      login(accessToken); // Actualiza el estado global, lo que debería disparar la navegación
+      Toast.show({
+        type: 'success',
+        text1: 'Éxito',
+        text2: 'Sesión iniciada correctamente!',
+      });
+    } catch (error: any) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error de Verificación',
+        text2: error.message,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Phone Number"
-        keyboardType="phone-pad"
-        value={phone}
-        onChangeText={setPhone}
-        editable={!loading}
-      />
-      <Button title={loading ? "Loading..." : "Request OTP"} onPress={handleRequestOtp} disabled={otpRequested || loading} />
-
-      {otpRequested && (
+      <Text style={styles.title}>Bienvenido</Text>
+      <Text style={styles.subtitle}>Ingresa tu teléfono para continuar</Text>
+      
+      {!otpRequested ? (
         <>
           <TextInput
             style={styles.input}
-            placeholder="OTP Code"
+            placeholder="Número de Teléfono"
+            keyboardType="phone-pad"
+            value={phone}
+            onChangeText={setPhone}
+            editable={!loading}
+          />
+          {loading ? <ActivityIndicator size="large" color="#0000ff" /> : <Button title="Enviar Código" onPress={handleRequestOtp} />}
+        </>
+      ) : (
+        <>
+          <TextInput
+            style={styles.input}
+            placeholder="Código de 6 dígitos"
             keyboardType="number-pad"
             value={otp}
             onChangeText={setOtp}
             editable={!loading}
           />
-          <Button title={loading ? "Loading..." : "Verify OTP and Login"} onPress={handleVerifyOtp} disabled={loading} />
+          {loading ? <ActivityIndicator size="large" color="#0000ff" /> : <Button title="Verificar e Iniciar Sesión" onPress={handleVerifyOtp} />}
         </>
       )}
     </View>
@@ -83,18 +111,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#f5f5f5',
   },
   title: {
-    fontSize: 24,
-    marginBottom: 20,
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 30,
   },
   input: {
     width: '100%',
-    padding: 10,
+    padding: 15,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
-    marginBottom: 10,
+    borderRadius: 8,
+    marginBottom: 20,
+    fontSize: 16,
   },
 });
 

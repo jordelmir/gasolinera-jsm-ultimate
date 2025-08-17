@@ -1,0 +1,23 @@
+image:
+  repository: <YOUR_ECR_REPO_URL>/auth-service
+  tag: "latest"
+
+service:
+  port: 8080
+
+env:
+  - name: JWT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: puntog-secrets
+        key: JWT_SECRET
+  - name: POSTGRES_HOST
+    valueFrom:
+      secretKeyRef:
+        name: puntog-secrets
+        key: POSTGRES_HOST
+  - name: REDIS_URL
+    valueFrom:
+      secretKeyRef:
+        name: puntog-secrets
+        key: REDIS_URL

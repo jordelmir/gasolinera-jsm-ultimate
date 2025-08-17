@@ -1,44 +1,79 @@
-# This is a generic template. In a real scenario, you would have
-# templates for each service (deployment, service, ingress, etc.)
-
-{{- range .Values.services }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .name }}
+  name: {{ include "gasolinera-jsm.fullname" . }}
   labels:
-    app: {{ .name }}
+    {{- include "gasolinera-jsm.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .replicaCount | default $.Values.replicaCount }}
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
-      app: {{ .name }}
+      {{- include "gasolinera-jsm.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
-        app: {{ .name }}
+        {{- include "gasolinera-jsm.selectorLabels" . | nindent 8 }}
     spec:
-      containers:
-        - name: {{ .name }}
-          image: "{{ $.Values.image.repository }}/{{ .name }}:{{ $.Values.image.tag }}"
-          imagePullPolicy: {{ $.Values.image.pullPolicy }}
-          ports:
-            - containerPort: {{ .port | default 8080 }}
-          envFrom:
-            - configMapRef:
-                name: {{ $.Release.Name }}-config
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "gasolinera-jsm.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: migrate-db
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["java", "-jar", "app.jar"]
+          args: ["--spring.profiles.active=migrate"] # Assuming a 'migrate' profile or similar
           env:
-            {{- toYaml .env | nindent 12 }}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .name }}-service
-spec:
-  selector:
-    app: {{ .name }}
-  ports:
-    - protocol: TCP
-      port: {{ .port | default 8080 }}
-      targetPort: {{ .port | default 8080 }}
-{{- end }}
+            {{- toYaml .Values.env | nindent 12 }}
+          envFrom:
+            {{- toYaml .Values.secrets | nindent 12 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            {{- toYaml .Values.env | nindent 12 }}
+          envFrom:
+            {{- toYaml .Values.secrets | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

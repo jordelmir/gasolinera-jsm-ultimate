@@ -1,38 +1,71 @@
-name: CI Pipeline
+name: CI/CD Pipeline
 
-on:
+on: 
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+
+env:
+  AWS_REGION: us-east-1 # Replace with your desired AWS region
+  ECR_REPOSITORY: <YOUR_ECR_REPO_URL> # Replace with your ECR repository URL
 
 jobs:
-  build_and_test:
+  build-and-test:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # This is required for aws-actions/configure-aws-credentials@v4
+      contents: read # This is required for actions/checkout@v3
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-    - name: Install dependencies
-      run: npm install
+      - name: Build and Test Microservices
+        run: ./gradlew build
 
-    - name: Run Lint
-      run: npm run nx -- run-many --target=lint --all
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::<YOUR_AWS_ACCOUNT_ID>:role/<YOUR_GITHUB_ACTIONS_OIDC_ROLE> # Replace with your OIDC role ARN
+          aws-region: ${{ env.AWS_REGION }}
 
-    - name: Run Tests
-      run: npm run nx -- run-many --target=test --all
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build
-      run: npm run nx -- run-many --target=build --all
+      - name: Build and Push Docker Images
+        run: |
+          # Build and push auth-service
+          docker build -t ${{ env.ECR_REPOSITORY }}/auth-service:${{ github.sha }} ./services/auth-service
+          docker push ${{ env.ECR_REPOSITORY }}/auth-service:${{ github.sha }}
+
+          # Build and push redemption-service
+          docker build -t ${{ env.ECR_REPOSITORY }}/redemption-service:${{ github.sha }} ./services/redemption-service
+          docker push ${{ env.ECR_REPOSITORY }}/redemption-service:${{ github.sha }}
+
+          # Build and push ad-engine
+          docker build -t ${{ env.ECR_REPOSITORY }}/ad-engine:${{ github.sha }} ./services/ad-engine
+          docker push ${{ env.ECR_REPOSITORY }}/ad-engine:${{ github.sha }}
+
+          # Build and push raffle-service
+          docker build -t ${{ env.ECR_REPOSITORY }}/raffle-service:${{ github.sha }} ./services/raffle-service
+          docker push ${{ env.ECR_REPOSITORY }}/raffle-service:${{ github.sha }}
+
+          # Build and push api-gateway
+          docker build -t ${{ env.ECR_REPOSITORY }}/api-gateway:${{ github.sha }} ./services/api-gateway
+          docker push ${{ env.ECR_REPOSITORY }}/api-gateway:${{ github.sha }}
+
+          # Build and push station-service
+          docker build -t ${{ env.ECR_REPOSITORY }}/station-service:${{ github.sha }} ./services/station-service
+          docker push ${{ env.ECR_REPOSITORY }}/station-service:${{ github.sha }}

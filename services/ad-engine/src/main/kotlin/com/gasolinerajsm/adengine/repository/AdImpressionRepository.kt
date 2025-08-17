@@ -10,4 +10,9 @@ interface AdImpressionRepository : JpaRepository<AdImpression, Long> {
      * Encuentra todas las impresiones asociadas a un ID de campaña específico.
      */
     fun findByCampaignId(campaignId: Long): List<AdImpression>
+
+    /**
+     * Cuenta el número de impresiones para un anunciante específico.
+     */
+    fun countByAdvertiserId(advertiserId: String): Long
 }

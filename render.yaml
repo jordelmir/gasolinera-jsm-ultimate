@@ -1,0 +1,76 @@
+services:
+  # 1. La Base de Datos PostgreSQL
+  - type: pserv
+    name: postgres-db-puntog
+    plan: free # Puedes cambiarlo a un plan superior si necesitas más potencia
+    databaseName: puntog
+    user: puntog
+    postgresMajorVersion: 16
+
+  # 2. La Caché de Redis
+  - type: pserv
+    name: redis-cache-puntog
+    plan: free
+    ipAllowList: [] # Permite conexiones desde cualquier servicio de Render
+
+  # 3. Nuestro API Gateway (el único servicio público)
+  - type: web
+    name: api-gateway
+    plan: free
+    runtime: docker
+    dockerfilePath: ./services/api-gateway/Dockerfile
+    dockerContext: .
+    envVars:
+      - fromGroup: puntog-secrets # Usará un grupo de secretos centralizado
+      # La URL de la base de datos y Redis son inyectadas automáticamente por Render
+      - key: POSTGRES_HOST
+        fromService:
+          type: pserv
+          name: postgres-db-puntog
+          property: host
+      - key: REDIS_URL
+        fromService:
+          type: pserv
+          name: redis-cache-puntog
+          property: connectionString
+
+  # 4. El resto de microservicios (privados, solo accesibles a través del Gateway)
+  - type: pserv
+    name: auth-service
+    plan: free
+    runtime: docker
+    dockerfilePath: ./services/auth-service/Dockerfile
+    dockerContext: .
+    envVars:
+      - fromGroup: puntog-secrets
+      - key: POSTGRES_HOST
+        fromService:
+          type: pserv
+          name: postgres-db-puntog
+          property: host
+      - key: REDIS_URL
+        fromService:
+          type: pserv
+          name: redis-cache-puntog
+          property: connectionString
+
+  - type: pserv
+    name: redemption-service
+    plan: free
+    runtime: docker
+    dockerfilePath: ./services/redemption-service/Dockerfile
+    dockerContext: .
+    envVars:
+      - fromGroup: puntog-secrets
+      - key: POSTGRES_HOST
+        fromService:
+          type: pserv
+          name: postgres-db-puntog
+          property: host
+      - key: REDIS_URL
+        fromService:
+          type: pserv
+          name: redis-cache-puntog
+          property: connectionString
+
+  # (Aquí añadiríamos las definiciones para ad-engine y raffle-service, siguiendo el mismo patrón)
