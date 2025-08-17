@@ -3,17 +3,19 @@
   "installCommand": "npm install",
   "builds": [
     {
-      "src": "apps/admin/package.json",
-      "use": "@vercel/next",
+      "src": "package.json",
+      "use": "@vercel/static-build",
       "config": {
-        "outputDirectory": "dist/apps/admin"
+        "buildCommand": "npx nx build admin-dashboard --prod",
+        "outputDirectory": "dist/apps/admin-dashboard/.next"
       }
     },
     {
-      "src": "apps/advertiser/package.json",
-      "use": "@vercel/next",
+      "src": "package.json",
+      "use": "@vercel/static-build",
       "config": {
-        "outputDirectory": "dist/apps/advertiser"
+        "buildCommand": "npx nx build advertiser-portal --prod",
+        "outputDirectory": "dist/apps/advertiser-portal/.next"
       }
     }
   ]
