@@ -1,17 +1,6 @@
-const { withNx } = require(' @nx/next/with-nx');
-
-/**
- * @Type {import(' @nx/next/plugins/with-nx').WithNxOptions}
- **/
+/** @Type {import('next').NextConfig} */
 const nextConfig = {
-  nx: {
-    // Set this to true if you would like to use SVGR
-    // See: https://github.com/gregberge/svgr
-    svgr: false,
-  },
-  // Tu configuración de Next.js va aquí si tienes alguna.
-  // Por ejemplo:
-  // reactStrictMode: true,
+  // Dejamos esto vacío por ahora. No necesita configuración extra para compilar.
 };
 
-module.exports = withNx(nextConfig);
+module.exports = nextConfig;
