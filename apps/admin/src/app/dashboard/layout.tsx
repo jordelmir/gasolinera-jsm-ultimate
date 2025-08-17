@@ -64,7 +64,7 @@ export default function DashboardLayout({
           {children}
         </main>
       </div>
-    </CSR> {/* <--- CIERRE DEL ENVOLTORIO AQUÍ */}
     </div>
+    </CSR> {/* <--- CIERRE DEL ENVOLTORIO AQUÍ */}
   );
 }
