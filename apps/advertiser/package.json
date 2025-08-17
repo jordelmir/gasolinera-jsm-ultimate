@@ -25,7 +25,8 @@
     "zustand": "^4.5.2",
     "react-hook-form": "^7.51.0",
     "zod": "^3.22.4",
-    "react-toastify": "^10.0.5",
+    "@hookform/resolvers": "^3.3.4",
+    "react-toastify": "^10.0.5"
   },
   "devDependencies": {
     "typescript": "^5",
