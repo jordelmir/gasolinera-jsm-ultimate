@@ -2,7 +2,9 @@
 
 Este repositorio contiene el proyecto completo "Gasolinera JSM", una plataforma para digitalizar y monetizar la experiencia de recarga de combustible.
 
-## Visión
+## Propósito
+
+<!-- Vercel deployment trigger -->
 
 Transformar cada recarga de combustible en una experiencia digital gratificante para el usuario y en una nueva línea de ingresos para la estación.
 
