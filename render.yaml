@@ -17,17 +17,7 @@ services:
     dockerfilePath: ./services/api-gateway/Dockerfile
     dockerContext: .
     envVars:
-      # - fromGroup: puntog-secrets
-      - key: POSTGRES_URL
-        fromService:
-          type: pserv
-          name: postgres-db-puntog
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          type: pserv
-          name: redis-cache-puntog
-          property: connectionString
+      - fromGroup: puntog-secrets
 
   - type: pserv
     name: auth-service
@@ -36,17 +26,7 @@ services:
     dockerfilePath: ./services/auth-service/Dockerfile
     dockerContext: .
     envVars:
-      # - fromGroup: puntog-secrets
-      - key: POSTGRES_URL
-        fromService:
-          type: pserv
-          name: postgres-db-puntog
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          type: pserv
-          name: redis-cache-puntog
-          property: connectionString
+      - fromGroup: puntog-secrets
 
   - type: pserv
     name: redemption-service
@@ -55,17 +35,7 @@ services:
     dockerfilePath: ./services/redemption-service/Dockerfile
     dockerContext: .
     envVars:
-      # - fromGroup: puntog-secrets
-      - key: POSTGRES_URL
-        fromService:
-          type: pserv
-          name: postgres-db-puntog
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          type: pserv
-          name: redis-cache-puntog
-          property: connectionString
+      - fromGroup: puntog-secrets
 
   - type: pserv
     name: ad-engine
@@ -74,12 +44,7 @@ services:
     dockerfilePath: ./services/ad-engine/Dockerfile
     dockerContext: .
     envVars:
-      # - fromGroup: puntog-secrets
-      - key: POSTGRES_URL
-        fromService:
-          type: pserv
-          name: postgres-db-puntog
-          property: connectionString
+      - fromGroup: puntog-secrets
 
   - type: pserv
     name: raffle-service
@@ -88,9 +53,4 @@ services:
     dockerfilePath: ./services/raffle-service/Dockerfile
     dockerContext: .
     envVars:
-      # - fromGroup: puntog-secrets
-      - key: POSTGRES_URL
-        fromService:
-          type: pserv
-          name: postgres-db-puntog
-          property: connectionString
+      - fromGroup: puntog-secrets
