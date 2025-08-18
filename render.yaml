@@ -2,7 +2,8 @@ services:
   # 1. La Base de Datos PostgreSQL
   - type: pserv
     name: postgres-db-puntog
-    plan: free # Puedes cambiarlo a un plan superior si necesitas más potencia
+    # El plan gratuito puede suspenderse por inactividad. Considera un plan de pago para producción.
+    plan: free
     databaseName: puntog
     user: puntog
     postgresMajorVersion: 16
@@ -11,9 +12,10 @@ services:
   - type: pserv
     name: redis-cache-puntog
     plan: free
-    ipAllowList: [] # Permite conexiones desde cualquier servicio de Render
+    # Permite conexiones desde cualquier servicio dentro de tu cuenta de Render
+    ipAllowList: []
 
-  # 3. Nuestro API Gateway (el único servicio público)
+  # 3. Nuestro API Gateway (el único servicio público con URL externa)
   - type: web
     name: api-gateway
     plan: free
@@ -21,8 +23,9 @@ services:
     dockerfilePath: ./services/api-gateway/Dockerfile
     dockerContext: .
     envVars:
-      - fromGroup: puntog-secrets # Usará un grupo de secretos centralizado
-      # La URL de la base de datos y Redis son inyectadas automáticamente por Render
+      # Usará un grupo de secretos centralizado que crearemos en Render
+      - fromGroup: puntog-secrets
+      # Render inyecta automáticamente las URLs de conexión a la DB y Redis
       - key: POSTGRES_HOST
         fromService:
           type: pserv
@@ -74,29 +77,29 @@ services:
           property: connectionString
 
   - type: pserv
-        name: ad-engine
-        plan: free
-        runtime: docker
-        dockerfilePath: ./services/ad-engine/Dockerfile
-        dockerContext: .
-        envVars:
-          - fromGroup: puntog-secrets
-          - key: POSTGRES_HOST
-            fromService:
-              type: pserv
-              name: postgres-db-puntog
-              property: host
+    name: ad-engine
+    plan: free
+    runtime: docker
+    dockerfilePath: ./services/ad-engine/Dockerfile
+    dockerContext: .
+    envVars:
+      - fromGroup: puntog-secrets
+      - key: POSTGRES_HOST
+        fromService:
+          type: pserv
+          name: postgres-db-puntog
+          property: host
 
-      - type: pserv
-        name: raffle-service
-        plan: free
-        runtime: docker
-        dockerfilePath: ./services/raffle-service/Dockerfile
-        dockerContext: .
-        envVars:
-          - fromGroup: puntog-secrets
-          - key: POSTGRES_HOST
-            fromService:
-              type: pserv
-              name: postgres-db-puntog
-              property: host
+  - type: pserv
+    name: raffle-service
+    plan: free
+    runtime: docker
+    dockerfilePath: ./services/raffle-service/Dockerfile
+    dockerContext: .
+    envVars:
+      - fromGroup: puntog-secrets
+      - key: POSTGRES_HOST
+        fromService:
+          type: pserv
+          name: postgres-db-puntog
+          property: host
