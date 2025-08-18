@@ -1,7 +1,7 @@
 {
   "name": "admin",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/admin/src",
+  "sourceRoot": "apps/admin",
   "projectType": "application",
   "targets": {
     "build": {
@@ -13,33 +13,9 @@
       },
       "configurations": {
         "development": {
-          "outputPath": "dist/apps/admin"
+          "outputPath": "apps/admin"
         },
-        "production": {
-          "outputPath": "dist/apps/admin"
-        }
-      }
-    },
-    "serve": {
-      "executor": "@nx/next:serve",
-      "defaultConfiguration": "development",
-      "options": {
-        "buildTarget": "admin:build"
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "admin:build:development"
-        },
-        "production": {
-          "buildTarget": "admin:build:production"
-        }
-      }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["apps/admin/**/*.{ts,tsx,js,jsx}"]
+        "production": {}
       }
     }
   },
