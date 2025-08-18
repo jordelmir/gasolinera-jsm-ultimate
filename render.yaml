@@ -1,15 +1,20 @@
-databases:
-  - name: postgres-db-puntog
-    databaseName: puntog
-    user: puntog
-    plan: free
-    postgresMajorVersion: 16
-
-  - name: redis-cache-puntog
-    plan: free
-    ipAllowList: []
-
 services:
+  # Definición de la Base de Datos PostgreSQL como un servicio
+  - type: pserv
+    name: postgres-db-puntog
+    plan: free
+    postgres:
+      databaseName: puntog
+      user: puntog
+      majorVersion: 16
+
+  # Definición de la Caché de Redis como un servicio
+  - type: pserv
+    name: redis-cache-puntog
+    plan: free
+    redis: {} # Propiedad vacía para indicar que es un servicio de Redis
+
+  # Nuestro API Gateway (público)
   - type: web
     name: api-gateway
     plan: free
@@ -17,18 +22,19 @@ services:
     dockerfilePath: ./services/api-gateway/Dockerfile
     dockerContext: .
     envVars:
-      # - fromGroup: puntog-secrets
-      - key: POSTGRES_HOST
+      - fromGroup: puntog-secrets
+      - key: POSTGRES_URL # Render provee la URL de conexión completa
         fromService:
           type: pserv
           name: postgres-db-puntog
-          property: host
+          property: connectionString
       - key: REDIS_URL
         fromService:
           type: pserv
           name: redis-cache-puntog
           property: connectionString
 
+  # El resto de microservicios (privados)
   - type: pserv
     name: auth-service
     plan: free
@@ -36,18 +42,19 @@ services:
     dockerfilePath: ./services/auth-service/Dockerfile
     dockerContext: .
     envVars:
-      # - fromGroup: puntog-secrets
-      - key: POSTGRES_HOST
+      - fromGroup: puntog-secrets
+      - key: POSTGRES_URL
         fromService:
           type: pserv
           name: postgres-db-puntog
-          property: host
+          property: connectionString
       - key: REDIS_URL
         fromService:
           type: pserv
           name: redis-cache-puntog
           property: connectionString
 
+  # (Añadir aquí las definiciones para redemption, ad-engine, y raffle siguiendo el mismo patrón de auth-service)
   - type: pserv
     name: redemption-service
     plan: free
@@ -55,12 +62,12 @@ services:
     dockerfilePath: ./services/redemption-service/Dockerfile
     dockerContext: .
     envVars:
-      # - fromGroup: puntog-secrets
-      - key: POSTGRES_HOST
+      - fromGroup: puntog-secrets
+      - key: POSTGRES_URL
         fromService:
           type: pserv
           name: postgres-db-puntog
-          property: host
+          property: connectionString
       - key: REDIS_URL
         fromService:
           type: pserv
@@ -74,12 +81,12 @@ services:
     dockerfilePath: ./services/ad-engine/Dockerfile
     dockerContext: .
     envVars:
-      # - fromGroup: puntog-secrets
-      - key: POSTGRES_HOST
+      - fromGroup: puntog-secrets
+      - key: POSTGRES_URL
         fromService:
           type: pserv
           name: postgres-db-puntog
-          property: host
+          property: connectionString
 
   - type: pserv
     name: raffle-service
@@ -88,9 +95,9 @@ services:
     dockerfilePath: ./services/raffle-service/Dockerfile
     dockerContext: .
     envVars:
-      # - fromGroup: puntog-secrets
-      - key: POSTGRES_HOST
+      - fromGroup: puntog-secrets
+      - key: POSTGRES_URL
         fromService:
           type: pserv
           name: postgres-db-puntog
-          property: host
+          property: connectionString
