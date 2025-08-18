@@ -6,6 +6,7 @@ import { DollarSign, Megaphone, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { getCampaignPerformanceSummary } from "@/lib/apiClient"; // To be implemented
+import { toast } from 'react-toastify';
 
 
 interface CampaignSummary {
