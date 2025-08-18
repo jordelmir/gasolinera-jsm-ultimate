@@ -1,19 +1,15 @@
-# El archivo ahora tiene dos secciones principales: 'databases' y 'services'
 databases:
-  # Definición de la Base de Datos PostgreSQL
   - name: postgres-db-puntog
     databaseName: puntog
     user: puntog
     plan: free
     postgresMajorVersion: 16
 
-  # Definición de la Caché de Redis
   - name: redis-cache-puntog
     plan: free
-    ipAllowList: [] # Permite la conexión desde nuestros otros servicios
+    ipAllowList: []
 
-srvices:
-  # Nuestro API Gateway (el único servicio público)
+services:
   - type: web
     name: api-gateway
     plan: free
@@ -33,7 +29,6 @@ srvices:
           name: redis-cache-puntog
           property: connectionString
 
-  # El resto de microservicios (privados)
   - type: pserv
     name: auth-service
     plan: free
