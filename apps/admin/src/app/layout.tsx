@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: "Manage stations, campaigns, and raffles",
 };
 
+import Providers from "./providers"; // Import the Providers component
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -17,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
