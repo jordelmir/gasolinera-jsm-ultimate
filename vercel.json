@@ -2,11 +2,10 @@
   "version": 2,
   "builds": [
     {
-      "src": "apps/admin/next.config.js",
+      "src": "/apps/admin/next.config.js",
       "use": "@vercel/next",
       "config": {
-        "installCommand": "npm install",
-        "buildCommand": "next build"
+        "distDir": "../../dist/apps/admin/.next"
       }
     }
   ]
