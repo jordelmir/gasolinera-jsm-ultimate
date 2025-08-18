@@ -74,4 +74,5 @@ tasks.withType<Test> {
 tasks.getByName<BootJar>("bootJar") {
     archiveFileName.set("ad-engine.jar")
     mainClassName = "com.gasolinerajsm.adengine.AdEngineApplicationKt"
+    enabled = false // Temporarily disable bootJar to debug ClassNotFoundException
 }

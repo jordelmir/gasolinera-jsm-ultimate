@@ -93,4 +93,5 @@ tasks.withType<Test> {
 tasks.getByName<BootJar>("bootJar") {
     archiveFileName.set("auth-service.jar")
     mainClassName = "com.gasolinerajsm.authservice.AuthServiceApplicationKt"
+    enabled = false // Temporarily disable bootJar to debug ClassNotFoundException
 }
