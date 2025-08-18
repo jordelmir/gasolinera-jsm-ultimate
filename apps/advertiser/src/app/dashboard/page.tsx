@@ -2,10 +2,11 @@
 
 import { useEffect, useState } => "react";
 import { DollarSign, Megaphone, TrendingUp } from "lucide-react";
+import { DollarSign, Megaphone, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import { getCampaignPerformanceSummary } from "@/lib/apiClient"; // To be implemented
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+
 
 interface CampaignSummary {
   totalImpressions: number;
@@ -36,11 +37,20 @@ export default function AdvertiserDashboardPage() {
   }, []);
 
   if (isLoading) {
-    return <p>Cargando resumen de campañas...</p>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {
-    return <p className="text-red-500">Error: {error}</p>;
+    return (
+      <div className="flex flex-col items-center justify-center h-64 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <strong className="font-bold">Error!</strong>
+        <span className="block sm:inline">{error}</span>
+      </div>
+    );
   }
 
   return (
@@ -79,13 +89,12 @@ export default function AdvertiserDashboardPage() {
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">+18.5%</div>
+          <div className="text-2xl font-bold">N/A</div>
           <p className="text-xs text-muted-foreground">
-            Comparado con el mes anterior
+            Datos no disponibles
           </p>
         </CardContent>
       </Card>
-      <ToastContainer position="bottom-right" />
-    </div>
+      </div>
   );
 }

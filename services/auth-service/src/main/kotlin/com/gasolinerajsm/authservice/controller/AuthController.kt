@@ -13,13 +13,15 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.concurrent.TimeUnit
 import org.slf4j.LoggerFactory
+import org.springframework.core.env.Environment
 
 @RestController
 @RequestMapping("/auth")
 class AuthController(
     private val jwtService: JwtService,
     private val redisTemplate: StringRedisTemplate,
-    private val userService: UserService
+    private val userService: UserService,
+    private val env: Environment
 ) {
 
     private val logger = LoggerFactory.getLogger(AuthController::class.java)
@@ -28,7 +30,7 @@ class AuthController(
     fun requestOtp(@Valid @RequestBody request: OtpRequest): ResponseEntity<Void> {
         val otpCode = (100000..999999).random().toString() // Generate 6-digit code
         redisTemplate.opsForValue().set(request.phone, otpCode, 5, TimeUnit.MINUTES) // Store for 5 mins
-        logger.info("OTP requested for phone {}: {}", request.phone, otpCode) // For manual testing
+        logger.info("OTP requested for phone {}") // For manual testing
         return ResponseEntity.ok().build()
     }
 
@@ -55,8 +57,8 @@ class AuthController(
     @PostMapping("/login/admin")
     fun adminLogin(@Valid @RequestBody request: AdminLoginRequest): ResponseEntity<Any> {
         // HARDCODED credentials for now as per requirements
-        val adminEmail = "admin@puntog.com"
-        val adminPass = "admin123"
+        val adminEmail = env.getProperty("app.auth.admin-email", "admin@puntog.com")
+        val adminPass = env.getProperty("app.auth.admin-password", "admin123")
 
         if (request.email != adminEmail || request.pass != adminPass) {
             logger.warn("Admin login failed for email: {}", request.email)
@@ -75,8 +77,8 @@ class AuthController(
     @PostMapping("/login/advertiser")
     fun advertiserLogin(@Valid @RequestBody request: AdminLoginRequest): ResponseEntity<Any> {
         // In a real system, this would check the advertiser table
-        val advertiserEmail = "anunciante@tosty.com"
-        val advertiserPass = "tosty123"
+        val advertiserEmail = env.getProperty("app.auth.advertiser-email", "anunciante@tosty.com")
+        val advertiserPass = env.getProperty("app.auth.advertiser-password", "tosty123")
 
         if (request.email != advertiserEmail || request.pass != advertiserPass) {
             logger.warn("Advertiser login failed for email: {}", request.email)

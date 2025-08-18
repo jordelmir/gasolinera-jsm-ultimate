@@ -1,10 +1,4 @@
-// Asume que el token de autenticación se gestiona globalmente (ej. Zustand, Context)
-let authToken: string | null = null;
-
-// Función para establecer el token desde la app
-export const setAuthToken = (token: string | null) => {
-  authToken = token;
-};
+import { useUserStore } from '../store/userStore'; // Import the Zustand store
 
 const API_BASE_URL = 'http://192.168.1.100:8080/api/v1'; // Reemplazar con la IP del API Gateway
 
@@ -21,8 +15,9 @@ async function apiFetch(endpoint: string, options: RequestInit = {}) {
     ...options.headers,
   };
 
-  if (authToken) {
-    headers['Authorization'] = `Bearer ${authToken}`;
+  const accessToken = useUserStore.getState().accessToken; // Get token from Zustand store
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`;
   }
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {

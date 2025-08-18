@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ErrorBoundary from './src/components/ErrorBoundary';
@@ -9,44 +9,29 @@ import RedemptionScreen from './src/screens/RedemptionScreen';
 import AdPlayerScreen from './src/screens/AdPlayerScreen';
 import RafflesScreen from './src/screens/RafflesScreen';
 import Toast from 'react-native-toast-message';
+import { useUserStore } from './src/store/userStore'; // Import the Zustand store
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const [authToken, setAuthToken] = useState<string | null>(null);
+  const accessToken = useUserStore((state) => state.accessToken);
+  const setTokens = useUserStore((state) => state.setTokens);
 
   // In a real app, you would load the token from AsyncStorage on app startup
-  useEffect(() => {
-    // Simulate loading token from storage
-    const storedToken = null; // Replace with actual AsyncStorage.getItem('authToken')
-    if (storedToken) {
-      setAuthToken(storedToken);
-    }
-  }, []);
-
-  const handleLogin = (token: string) => {
-    setAuthToken(token);
-    // In a real app, you would save the token to AsyncStorage
-    // AsyncStorage.setItem('authToken', token);
-  };
-
-  const handleLogout = () => {
-    setAuthToken(null);
-    // In a real app, you would remove the token from AsyncStorage
-    // AsyncStorage.removeItem('authToken');
-  };
+  // This logic should be moved inside the userStore or a dedicated hook
+  // For now, we'll keep it simple and assume the store handles persistence
 
   return (
     <ErrorBoundary>
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-          {authToken ? (
+          {accessToken ? (
             <Stack.Screen name="Home">
-              {props => <HomeScreen {...props} onLogout={handleLogout} />}
+              {props => <HomeScreen {...props} onLogout={() => setTokens(null, null)} />}
             </Stack.Screen>
           ) : (
             <Stack.Screen name="Login">
-              {props => <LoginScreen {...props} onLogin={handleLogin} />}
+              {props => <LoginScreen {...props} onLogin={(token, refreshToken) => setTokens(token, refreshToken)} />}
             </Stack.Screen>
           )}
           {/* Other screens that require authentication can be nested within the authenticated flow */}
