@@ -17,7 +17,7 @@ services:
     dockerfilePath: ./services/api-gateway/Dockerfile
     dockerContext: .
     envVars:
-      - fromGroup: puntog-secrets
+      # - fromGroup: puntog-secrets
       - key: POSTGRES_HOST
         fromService:
           type: pserv
@@ -36,7 +36,7 @@ services:
     dockerfilePath: ./services/auth-service/Dockerfile
     dockerContext: .
     envVars:
-      - fromGroup: puntog-secrets
+      # - fromGroup: puntog-secrets
       - key: POSTGRES_HOST
         fromService:
           type: pserv
@@ -55,7 +55,7 @@ services:
     dockerfilePath: ./services/redemption-service/Dockerfile
     dockerContext: .
     envVars:
-      - fromGroup: puntog-secrets
+      # - fromGroup: puntog-secrets
       - key: POSTGRES_HOST
         fromService:
           type: pserv
@@ -74,7 +74,7 @@ services:
     dockerfilePath: ./services/ad-engine/Dockerfile
     dockerContext: .
     envVars:
-      - fromGroup: puntog-secrets
+      # - fromGroup: puntog-secrets
       - key: POSTGRES_HOST
         fromService:
           type: pserv
@@ -88,8 +88,8 @@ services:
     dockerfilePath: ./services/raffle-service/Dockerfile
     dockerContext: .
     envVars:
-      - fromGroup: puntog-secrets
-      - key: POSTG-RES_HOST
+      # - fromGroup: puntog-secrets
+      - key: POSTGRES_HOST
         fromService:
           type: pserv
           name: postgres-db-puntog
