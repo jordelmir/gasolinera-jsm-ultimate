@@ -4,7 +4,25 @@ plugins {
     kotlin("jvm") version "1.9.22"
     kotlin("plugin.spring") version "1.9.22"
     kotlin("plugin.jpa") version "1.9.22"
+    id("io.gitlab.arturbosch.detekt") version "1.23.6" // Detekt plugin
 }
+
+detekt {
+    toolVersion = "1.23.6"
+    buildUponDefaultConfig = true
+    allRules = false // Set to true to enable all rules, or false to use default config
+    // config = files("${project.rootDir}/detekt-config.yml") // Optional: path to custom Detekt config
+    baseline = file("detekt-baseline.xml") // Optional: path to Detekt baseline file
+    reports {
+        xml { enabled = true }
+        html { enabled = true }
+        txt { enabled = false }
+        sarif { enabled = false }
+    }
+}
+
+dependencies {
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.6") // Detekt formatting rules
 
 group = "com.gasolinerajsm"
 version = "0.0.1-SNAPSHOT"
