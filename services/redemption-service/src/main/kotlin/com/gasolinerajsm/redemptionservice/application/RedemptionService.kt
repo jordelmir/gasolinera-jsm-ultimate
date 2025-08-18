@@ -140,4 +140,8 @@ class RedemptionService(
 
         return ConfirmAdResponse(balance = 100) // Mock balance
     }
+
+    fun countTotalPointsRedeemed(): Long {
+        return pointsLedgerRepository.sumPointsCredited() // Assuming this method exists or will be created
+    }
 }

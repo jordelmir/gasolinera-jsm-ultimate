@@ -42,3 +42,7 @@ auth-service:
   uri: http://auth-service:8081
 redemption-service:
   uri: http://redemption-service:8082
+ad-engine:
+  url: http://ad-engine:8083 # Assuming ad-engine runs on port 8083
+redemption-service:
+  url: http://redemption-service:8084 # Assuming redemption-service runs on port 8084

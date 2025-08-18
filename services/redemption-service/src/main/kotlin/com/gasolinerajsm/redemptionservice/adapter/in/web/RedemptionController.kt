@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.http.ResponseEntity
 
 @RestController
 @RequestMapping("/redeem")
@@ -32,5 +34,11 @@ class RedemptionController(
         // In a real app, get userId from JWT token
         val userId = "user-placeholder-id"
         return redemptionService.confirmAdWatched(userId, request)
+    }
+
+    @GetMapping("/points-redeemed/count")
+    fun countPointsRedeemed(): ResponseEntity<Long> {
+        val count = redemptionService.countTotalPointsRedeemed()
+        return ResponseEntity.ok(count)
     }
 }
