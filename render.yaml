@@ -20,12 +20,12 @@ services:
       - fromGroup: puntog-secrets
       - key: POSTGRES_HOST
         fromService:
-          type: postgres
+          type: pserv
           name: postgres-db-puntog
           property: host
       - key: REDIS_URL
         fromService:
-          type: redis
+          type: pserv
           name: redis-cache-puntog
           property: connectionString
 
@@ -39,12 +39,12 @@ services:
       - fromGroup: puntog-secrets
       - key: POSTGRES_HOST
         fromService:
-          type: postgres
+          type: pserv
           name: postgres-db-puntog
           property: host
       - key: REDIS_URL
         fromService:
-          type: redis
+          type: pserv
           name: redis-cache-puntog
           property: connectionString
 
@@ -58,12 +58,12 @@ services:
       - fromGroup: puntog-secrets
       - key: POSTGRES_HOST
         fromService:
-          type: postgres
+          type: pserv
           name: postgres-db-puntog
           property: host
       - key: REDIS_URL
         fromService:
-          type: redis
+          type: pserv
           name: redis-cache-puntog
           property: connectionString
 
@@ -77,7 +77,7 @@ services:
       - fromGroup: puntog-secrets
       - key: POSTGRES_HOST
         fromService:
-          type: postgres
+          type: pserv
           name: postgres-db-puntog
           property: host
 
@@ -89,8 +89,8 @@ services:
     dockerContext: .
     envVars:
       - fromGroup: puntog-secrets
-      - key: POSTGRES_HOST
+      - key: POSTG-RES_HOST
         fromService:
-          type: postgres
+          type: pserv
           name: postgres-db-puntog
           property: host
