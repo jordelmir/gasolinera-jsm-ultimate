@@ -1,14 +1,17 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Button } from '../components/Button'; // Import the custom Button component
+import { useUserStore } from '../store/userStore';
 
 interface HomeScreenProps {
   navigation: any;
-  onLogout: () => void;
 }
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, onLogout }) => {
+const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
+  const setTokens = useUserStore((state) => state.setTokens);
+
   const handleLogout = () => {
-    onLogout();
+    setTokens(null, null);
   };
 
   return (
@@ -16,11 +19,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, onLogout }) => {
       <Text style={styles.title}>¡Bienvenido a Gasolinera JSM!</Text>
       <Text style={styles.subtitle}>Has iniciado sesión.</Text>
       
-      <Button title="Escanear QR" onPress={() => navigation.navigate('Scanner')} />
-      <View style={{ marginVertical: 10 }} />
-      <Button title="Ver Sorteos" onPress={() => navigation.navigate('Raffles')} />
-      <View style={{ marginVertical: 10 }} />
-      <Button title="Cerrar Sesión" onPress={handleLogout} />
+      <View style={styles.buttonContainer}>
+        <Button title="Escanear QR" onPress={() => navigation.navigate('Scanner')} />
+      </View>
+      <View style={styles.buttonContainer}>
+        <Button title="Ver Sorteos" onPress={() => navigation.navigate('Raffles')} />
+      </View>
+      <View style={styles.buttonContainer}>
+        <Button title="Cerrar Sesión" onPress={handleLogout} />
+      </View>
     </View>
   );
 };
@@ -31,16 +38,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: '#F0F2F5',
   },
   title: {
-    fontSize: 24,
-    marginBottom: 10,
+    fontSize: 28,
     fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
   },
   subtitle: {
     fontSize: 18,
-    marginBottom: 20,
-    color: '#666',
+    marginBottom: 30,
+    color: '#555',
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    width: '80%',
+    marginBottom: 15,
   },
 });
 

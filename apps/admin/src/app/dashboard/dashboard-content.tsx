@@ -2,11 +2,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { DollarSign, Package, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getTodaySummary } from "@/lib/apiClient";
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+
 
 interface SummaryData {
   totalRevenue: number;
@@ -36,11 +36,20 @@ export default function DashboardContent() {
   }, []);
 
   if (isLoading) {
-    return <p>Cargando métricas del dashboard...</p>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {
-    return <p className="text-red-500">Error: {error}</p>;
+    return (
+      <div className="flex flex-col items-center justify-center h-64 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <strong className="font-bold">Error!</strong>
+        <span className="block sm:inline">{error}</span>
+      </div>
+    );
   }
 
   return (
@@ -85,7 +94,6 @@ export default function DashboardContent() {
           </p>
         </CardContent>
       </Card>
-      <ToastContainer position="bottom-right" />
-    </div>
+      </div>
   );
 }

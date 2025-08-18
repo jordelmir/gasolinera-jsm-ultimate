@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
-import { requestOtp, verifyOtp, setAuthToken } from '../api/apiClient';
+import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { Spinner } from '../components/Spinner'; // Import the new Spinner component
+import { Button } from '../components/Button'; // Import the custom Button component
+import { requestOtp, verifyOtp } from '../api/apiClient';
 import { useUserStore } from '../store/userStore';
 import Toast from 'react-native-toast-message';
 
@@ -10,7 +12,7 @@ const LoginScreen = () => {
   const [otp, setOtp] = useState('');
   const [otpRequested, setOtpRequested] = useState(false);
   const [loading, setLoading] = useState(false);
-  const login = useUserStore((state) => state.login);
+  const setTokens = useUserStore((state) => state.setTokens);
 
   const handleRequestOtp = async () => {
     if (!phone) {
@@ -53,8 +55,7 @@ const LoginScreen = () => {
     setLoading(true);
     try {
       const { accessToken } = await verifyOtp(phone, otp);
-      setAuthToken(accessToken); // Configura el token para futuras llamadas de API
-      login(accessToken); // Actualiza el estado global, lo que debería disparar la navegación
+      setTokens(accessToken, null); // Actualiza el estado global, lo que debería disparar la navegación
       Toast.show({
         type: 'success',
         text1: 'Éxito',
@@ -86,7 +87,7 @@ const LoginScreen = () => {
             onChangeText={setPhone}
             editable={!loading}
           />
-          {loading ? <ActivityIndicator size="large" color="#0000ff" /> : <Button title="Enviar Código" onPress={handleRequestOtp} />}
+          {loading ? <Spinner /> : <Button title="Enviar Código" onPress={handleRequestOtp} loading={loading} />}
         </>
       ) : (
         <>
@@ -98,7 +99,7 @@ const LoginScreen = () => {
             onChangeText={setOtp}
             editable={!loading}
           />
-          {loading ? <ActivityIndicator size="large" color="#0000ff" /> : <Button title="Verificar e Iniciar Sesión" onPress={handleVerifyOtp} />}
+          {loading ? <Spinner /> : <Button title="Verificar e Iniciar Sesión" onPress={handleVerifyOtp} loading={loading} />}
         </>
       )}
     </View>
@@ -111,26 +112,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F0F2F5', // Light gray background
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
+    color: '#333', // Darker text for contrast
     marginBottom: 10,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 18,
+    color: '#555', // Slightly lighter text
     marginBottom: 30,
+    textAlign: 'center',
   },
   input: {
     width: '100%',
     padding: 15,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
+    borderColor: '#007bff', // Blue border for focus
+    borderRadius: 10, // More rounded corners
     marginBottom: 20,
     fontSize: 16,
+    backgroundColor: '#fff', // White background for input
+    shadowColor: '#000', // Subtle shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2, // Android shadow
   },
 });
 
