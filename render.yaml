@@ -1,21 +1,19 @@
-services:
-  # 1. La Base de Datos PostgreSQL
-  - type: pserv
-    name: postgres-db-puntog
-    # El plan gratuito puede suspenderse por inactividad. Considera un plan de pago para producción.
-    plan: free
+# El archivo ahora tiene dos secciones principales: 'databases' y 'services'
+databases:
+  # Definición de la Base de Datos PostgreSQL
+  - name: postgres-db-puntog
     databaseName: puntog
     user: puntog
+    plan: free
     postgresMajorVersion: 16
 
-  # 2. La Caché de Redis
-  - type: pserv
-    name: redis-cache-puntog
+  # Definición de la Caché de Redis
+  - name: redis-cache-puntog
     plan: free
-    # Permite conexiones desde cualquier servicio dentro de tu cuenta de Render
-    ipAllowList: []
+    ipAllowList: [] # Permite la conexión desde nuestros otros servicios
 
-  # 3. Nuestro API Gateway (el único servicio público con URL externa)
+srvices:
+  # Nuestro API Gateway (el único servicio público)
   - type: web
     name: api-gateway
     plan: free
@@ -23,21 +21,19 @@ services:
     dockerfilePath: ./services/api-gateway/Dockerfile
     dockerContext: .
     envVars:
-      # Usará un grupo de secretos centralizado que crearemos en Render
       - fromGroup: puntog-secrets
-      # Render inyecta automáticamente las URLs de conexión a la DB y Redis
       - key: POSTGRES_HOST
         fromService:
-          type: pserv
+          type: postgres
           name: postgres-db-puntog
           property: host
       - key: REDIS_URL
         fromService:
-          type: pserv
+          type: redis
           name: redis-cache-puntog
           property: connectionString
 
-  # 4. El resto de microservicios (privados, solo accesibles a través del Gateway)
+  # El resto de microservicios (privados)
   - type: pserv
     name: auth-service
     plan: free
@@ -48,12 +44,12 @@ services:
       - fromGroup: puntog-secrets
       - key: POSTGRES_HOST
         fromService:
-          type: pserv
+          type: postgres
           name: postgres-db-puntog
           property: host
       - key: REDIS_URL
         fromService:
-          type: pserv
+          type: redis
           name: redis-cache-puntog
           property: connectionString
 
@@ -67,12 +63,12 @@ services:
       - fromGroup: puntog-secrets
       - key: POSTGRES_HOST
         fromService:
-          type: pserv
+          type: postgres
           name: postgres-db-puntog
           property: host
       - key: REDIS_URL
         fromService:
-          type: pserv
+          type: redis
           name: redis-cache-puntog
           property: connectionString
 
@@ -86,7 +82,7 @@ services:
       - fromGroup: puntog-secrets
       - key: POSTGRES_HOST
         fromService:
-          type: pserv
+          type: postgres
           name: postgres-db-puntog
           property: host
 
@@ -100,6 +96,6 @@ services:
       - fromGroup: puntog-secrets
       - key: POSTGRES_HOST
         fromService:
-          type: pserv
+          type: postgres
           name: postgres-db-puntog
           property: host
