@@ -6,6 +6,7 @@ databases:
     postgresMajorVersion: 16
 
   - name: redis-cache-puntog
+    type: redis
     plan: free
     ipAllowList: []
 
