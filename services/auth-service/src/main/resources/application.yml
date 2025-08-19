@@ -48,5 +48,10 @@ app:
     advertiser-password: ${ADVERTISER_PASSWORD:tosty123}
 
 # --- OpenTelemetry Tracing Configuration ---
-management.tracing.sampling.probability=1.0
-management.otlp.tracing.endpoint=http://jaeger:4318/v1/traces
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://jaeger:4318/v1/traces

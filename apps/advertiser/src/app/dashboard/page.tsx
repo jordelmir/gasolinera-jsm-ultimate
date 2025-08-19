@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } => "react";
+import { useEffect, useState } from "react";
 import { DollarSign, Megaphone, TrendingUp } from "lucide-react";
 import { DollarSign, Megaphone, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

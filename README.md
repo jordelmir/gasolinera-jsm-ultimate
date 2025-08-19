@@ -1,112 +1,111 @@
-# Gasolinera JSM - Monorepo
+# Gasolinera JSM Ultimate Rewards
 
-Este repositorio contiene el proyecto completo "Gasolinera JSM", una plataforma para digitalizar y monetizar la experiencia de recarga de combustible.
+Este repositorio contiene la nueva aplicación web "Gasolinera JSM Ultimate Rewards", construida con React y Firebase, siguiendo la "Orden Maestra para Gemini CLI" proporcionada. Esta aplicación está diseñada para digitalizar y gamificar la experiencia de recarga de combustible, ofreciendo un sistema de cupones digitales y sorteos para clientes, así como dashboards específicos para pisteros y dueños de gasolineras.
 
-## Propósito
+## Arquitectura y Tecnologías
 
-<!-- Vercel deployment trigger -->
+La aplicación se basa en la siguiente pila tecnológica:
 
-Transformar cada recarga de combustible en una experiencia digital gratificante para el usuario y en una nueva línea de ingresos para la estación.
+-   **Workspace:** Nx
+-   **Frontend:** Next.js (React)
+-   **Backend/Base de Datos/Autenticación:** Google Firebase (Firestore y Authentication)
+-   **Estilos:** Tailwind CSS
 
-## Arquitectura y Stack Tecnológico
+## Estructura del Proyecto
 
-El sistema está construido sobre una arquitectura de microservicios utilizando un monorepo `nx`.
+El proyecto es un monorepo gestionado por Nx. La aplicación web principal se encuentra en `apps/admin`:
 
--   **Backend:** Kotlin + Spring Boot 3 + Java 17
--   **Frontend (Web):** Next.js + TypeScript + Tailwind CSS
--   **Móvil:** React Native (Expo) + TypeScript
--   **Base de Datos:** PostgreSQL
--   **Cache/Locks:** Redis
--   **Mensajería:** RabbitMQ (con soporte para Kafka a través de Debezium)
--   **Observabilidad:** OpenTelemetry y Jaeger para tracing distribuido.
--   **Patrones de Diseño:** Patrón Outbox con Debezium para garantizar la entrega de mensajes.
--   **API y SDK:** OpenAPI para la definición de APIs y generación de un SDK interno para la comunicación entre servicios.
--   **Infraestructura:** Docker, Kubernetes (Helm), Terraform
--   **CI/CD:** GitHub Actions
+-   `apps/admin/`
+    -   `src/`
+        -   `app/`: Vistas y layout principal de la aplicación.
+        -   `components/`: Componentes reutilizables de UI.
+        -   `lib/`: Utilidades y lógica de cliente.
+-   `src/` (Legacy)
+    -   `pages/`: Vistas principales de la aplicación (Login, Dashboards).
+    -   `firebase/`: Configuración y servicios de Firebase.
+    -   `context/`: Contexto de React para la gestión de la autenticación global.
+    -   `App.jsx`: Componente principal que maneja el enrutamiento.
 
-## Cómo Compilar y Ejecutar
+## Configuración y Ejecución Local
 
-Sigue estos pasos para levantar el entorno de desarrollo en tu máquina local.
+Sigue estos pasos para configurar y ejecutar la aplicación en tu entorno local:
 
-### Requisitos Previos
+### 1. Clonar el Repositorio
 
-Asegúrate de tener las siguientes herramientas instaladas:
-
--   Docker Desktop
--   JDK 17 (Java Development Kit)
--   Git
-
-### Pasos
-
-1.  **Clonar el Repositorio:**
-    ```bash
-    git clone https://github.com/tu-usuario/gasolinera-jsm-ultimate.git
-    cd gasolinera-jsm-ultimate
-    ```
-
-2.  **Configurar el Entorno:**
-    Copia el archivo de ejemplo `.env.example` para crear tu configuración local.
-    ```bash
-    cp .env.example .env
-    ```
-    Abre el archivo `.env` y rellena las variables de entorno necesarias.
-
-3.  **Construir las Imágenes Docker:**
-    Este comando utiliza el `Makefile` para construir las imágenes de todos los servicios definidos en `docker-compose.yml`.
-    ```bash
-    make build-all
-    ```
-
-4.  **Levantar los Servicios:**
-    Una vez construidas las imágenes, levanta todos los contenedores en modo detached.
-    ```bash
-    make dev
-    ```
-
-5.  **Verificar los Servicios:**
-    Para ver los logs de todos los servicios y asegurarte de que están funcionando correctamente, usa:
-    ```bash
-    make logs
-    ```
-    También puedes ver los logs de un servicio específico:
-    ```bash
-    docker compose logs -f <nombre-del-servicio>
-    ```
-
-## Servicios y URLs Locales
-
-Una vez que `make dev` se complete, los siguientes servicios estarán disponibles:
-
--   **API Gateway:** [http://localhost:8080](http://localhost:8080)
--   **Admin Dashboard:** [http://localhost:3000](http://localhost:3000)
--   **Advertiser Portal:** [http://localhost:3001](http://localhost:3001)
--   **PostgreSQL:** `localhost:5432`
--   **Redis:** `localhost:6379`
--   **RabbitMQ Management:** [http://localhost:15672](http://localhost:15672)
--   **Jaeger UI (Tracing):** [http://localhost:16686](http://localhost:16686)
-
-## Scripts Útiles
-
--   `make build-all`: Construye las imágenes Docker de todos los servicios.
--   `make dev`: Inicia todo el entorno de desarrollo con Docker Compose.
--   `make stop`: Detiene todos los contenedores.
--   `make clean`: Detiene y elimina todos los contenedores, volúmenes y redes.
--   `make logs`: Muestra los logs de todos los servicios.
--   `make test`: Ejecuta tests unitarios e de integración en todos los servicios.
--   `make seed`: Ejecuta el script de seeding para poblar la base de datos con datos de prueba.
--   `make mobile`: Inicia el servidor de desarrollo de la app móvil (Expo).
--   `make k8s-up`: Despliega la aplicación en un clúster de Kubernetes local.
--   `make k8s-down`: Elimina el despliegue de Kubernetes.
-
-This is a demo line for a Pull Request.
-
-## FAQ
-
-**¿Cómo genero nuevos códigos QR firmados?**
-Usa el script de `ops`. Requiere que el entorno esté corriendo para acceder a los secretos.
 ```bash
-npm run nx -- run ops:qr:generate --count 10
+git clone [URL_DEL_REPOSITORIO]
+cd gasolinera-jsm-ultimate
 ```
 
-**¿Dónde están las credenciales de prueba?**
-Revisa el script de seeding `ops/scripts/dev/seed.ts` para ver los usuarios y estaciones de prueba que se crean.
+### 2. Configurar Firebase
+
+1.  **Crear un Proyecto Firebase:** Si aún no tienes uno, crea un nuevo proyecto en la [Consola de Firebase](https://console.firebase.google.com/).
+2.  **Configurar Firestore:** Habilita Cloud Firestore en tu proyecto de Firebase. Asegúrate de configurar las reglas de seguridad adecuadas para tus colecciones (`users`, `coupons`, `stations`).
+3.  **Configurar Authentication:** Habilita el método de autenticación por "Email/Password" en tu proyecto de Firebase.
+4.  **Obtener Credenciales de Configuración:** En la Consola de Firebase, ve a "Project settings" (Configuración del proyecto) y busca la sección "Your apps" (Tus aplicaciones). Selecciona la aplicación web y copia el objeto `firebaseConfig`.
+5.  **Actualizar `src/firebase/config.js`:** Abre el archivo `src/firebase/config.js` en tu proyecto y reemplaza los placeholders con tus credenciales de Firebase:
+
+    ```javascript
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "TU_AUTH_DOMAIN",
+      projectId: "TU_PROJECT_ID",
+      storageBucket: "TU_STORAGE_BUCKET",
+      messagingSenderId: "TU_MESSAGING_SENDER_ID",
+      appId: "TU_APP_ID"
+    };
+    ```
+
+### 3. Instalar Dependencias
+
+Navega al directorio raíz del proyecto e instala las dependencias:
+
+```bash
+npm install
+```
+
+### 4. Ejecutar la Aplicación
+
+Para iniciar el servidor de desarrollo para la aplicación `admin`:
+
+```bash
+npx nx serve admin
+```
+
+La aplicación estará disponible en `http://localhost:4200` (o el puerto que Nx asigne).
+
+## Roles de Usuario y Funcionalidades
+
+La aplicación soporta tres roles de usuario principales:
+
+### Cliente
+
+-   **Dashboard Personal:** Visualiza el total de tickets acumulados para los sorteos.
+-   **Escáner QR:** Permite escanear códigos QR generados por los pisteros para activar cupones y obtener tickets.
+-   **Activación y Anuncios:** Opción de ver un anuncio corto para duplicar los tickets de una compra específica.
+-   **Mis Tickets:** Lista de tokens únicos acumulados.
+-   **Notificación de Ganador:** Pantalla de celebración en caso de ganar un sorteo.
+
+### Pistero (Empleado)
+
+-   **Interfaz Ultra-Simple:** Pantalla con un contador para ajustar la cantidad de "múltiplos de 5000" de la compra del cliente.
+-   **Generación de QR:** Botón para generar un código QR único y de un solo uso para que el cliente lo escanee. La pantalla se resetea automáticamente para el siguiente cliente.
+
+### Dueño (Administrador)
+
+-   **Dashboard de Negocio:** Paneles de control visuales con métricas clave.
+-   **Gestión de Sucursales:** Funcionalidad para agregar, ver y administrar gasolineras.
+-   **Gestión de Empleados:** Registro de pisteros y asignación a sucursales.
+-   **Analíticas de Rendimiento:** Gráficos y datos sobre tickets generados por empleado y sucursal.
+
+## Lógica del Sorteo
+
+La aplicación está diseñada para implementar una lógica de sorteo automatizada y transparente. Los sorteos (semanales y anuales) se realizarán de forma aleatoria entre todos los tickets activos, seleccionando un token ganador y notificando al usuario correspondiente.
+
+## Consideraciones Adicionales
+
+-   **Seguridad:** La autenticación se maneja a través de Firebase Authentication. Las reglas de seguridad de Firestore deben configurarse cuidadosamente para proteger los datos.
+-   **Escalabilidad:** Firebase proporciona una solución escalable para la base de datos y la autenticación, adecuada para un crecimiento futuro.
+-   **Despliegue:** La aplicación puede ser desplegada en plataformas como Vercel o Netlify después de ejecutar `npx nx build admin --prod`.
+
+Esperamos que esta nueva aplicación sea una base sólida para "Gasolinera JSM Ultimate Rewards" y te ayude a alcanzar tus objetivos de digitalización y monetización. ¡No dudes en contactarme si tienes alguna pregunta o necesitas más asistencia!

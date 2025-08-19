@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="4.3">
+<file name="/data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/service/JwtService.kt">
+	<error line="50" column="18" severity="warning" message="The caught exception is too generic. Prefer catching specific exceptions to the case that is currently handled." source="detekt.TooGenericExceptionCaught" />
+	<error line="3" column="1" severity="warning" message="Imports must be ordered in lexicographic order without any empty lines in-between with &quot;java&quot;, &quot;javax&quot;, &quot;kotlin&quot; and aliases in the end" source="detekt.ImportOrdering" />
+	<error line="17" column="44" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
+	<error line="17" column="49" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
+	<error line="17" column="54" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
+	<error line="18" column="45" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
+	<error line="18" column="49" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
+	<error line="18" column="54" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
+	<error line="18" column="59" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
+	<error line="18" column="64" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
+</file>
+<file name="/data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/controller/AuthController.kt">
+	<error line="1" column="1" severity="warning" message="File must end with a newline (\n)" source="detekt.FinalNewline" />
+	<error line="13" column="1" severity="warning" message="Wildcard import" source="detekt.NoWildcardImports" />
+	<error line="3" column="1" severity="warning" message="Imports must be ordered in lexicographic order without any empty lines in-between with &quot;java&quot;, &quot;javax&quot;, &quot;kotlin&quot; and aliases in the end" source="detekt.ImportOrdering" />
+	<error line="96" column="2" severity="warning" message="The file /data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/controller/AuthController.kt is not ending with a new line." source="detekt.NewLineAtEndOfFile" />
+	<error line="13" column="1" severity="warning" message="org.springframework.web.bind.annotation.* is a wildcard import. Replace it with fully qualified imports." source="detekt.WildcardImport" />
+	<error line="31" column="24" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
+	<error line="31" column="32" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
+	<error line="32" column="65" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
+</file>
+<file name="/data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/service/AuthService.kt">
+	<error line="1" column="1" severity="warning" message="File must end with a newline (\n)" source="detekt.FinalNewline" />
+	<error line="50" column="2" severity="warning" message="The file /data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/service/AuthService.kt is not ending with a new line." source="detekt.NewLineAtEndOfFile" />
+	<error line="21" column="34" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
+	<error line="21" column="42" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
+	<error line="22" column="60" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
+	<error line="23" column="83" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
+	<error line="33" column="93" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
+	<error line="36" column="95" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
+</file>
+<file name="/data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/service/UserRepository.kt">
+	<error line="1" column="1" severity="warning" message="File must end with a newline (\n)" source="detekt.FinalNewline" />
+	<error line="10" column="2" severity="warning" message="The file /data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/service/UserRepository.kt is not ending with a new line." source="detekt.NewLineAtEndOfFile" />
+</file>
+<file name="/data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/dto/OtpRequest.kt">
+	<error line="1" column="1" severity="warning" message="File must end with a newline (\n)" source="detekt.FinalNewline" />
+	<error line="10" column="2" severity="warning" message="The file /data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/dto/OtpRequest.kt is not ending with a new line." source="detekt.NewLineAtEndOfFile" />
+</file>
+<file name="/data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/dto/OtpVerifyRequest.kt">
+	<error line="1" column="1" severity="warning" message="File must end with a newline (\n)" source="detekt.FinalNewline" />
+	<error line="15" column="2" severity="warning" message="The file /data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/dto/OtpVerifyRequest.kt is not ending with a new line." source="detekt.NewLineAtEndOfFile" />
+</file>
+<file name="/data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/dto/AdminLoginRequest.kt">
+	<error line="1" column="1" severity="warning" message="File must end with a newline (\n)" source="detekt.FinalNewline" />
+	<error line="15" column="2" severity="warning" message="The file /data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/dto/AdminLoginRequest.kt is not ending with a new line." source="detekt.NewLineAtEndOfFile" />
+</file>
+<file name="/data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/model/User.kt">
+	<error line="1" column="1" severity="warning" message="File must end with a newline (\n)" source="detekt.FinalNewline" />
+	<error line="3" column="1" severity="warning" message="Wildcard import" source="detekt.NoWildcardImports" />
+	<error line="27" column="2" severity="warning" message="The file /data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/model/User.kt is not ending with a new line." source="detekt.NewLineAtEndOfFile" />
+	<error line="3" column="1" severity="warning" message="jakarta.persistence.* is a wildcard import. Replace it with fully qualified imports." source="detekt.WildcardImport" />
+</file>
+</checkstyle>

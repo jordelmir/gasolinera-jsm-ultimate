@@ -20,8 +20,6 @@ spring:
         #   uri: lb://station-service
         #   predicates:
         #     - Path=/stations/**
-
-  cloud:
     vault:
       enabled: true
       scheme: http

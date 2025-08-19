@@ -1,5 +1,4 @@
-import
-org.springframework.boot.gradle.tasks.bundling.BootJar
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
     id("org.springframework.boot") version "3.3.3"
@@ -71,8 +70,8 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-tasks.getByName<BootJar>("bootJar") {
-    archiveFileName.set("ad-engine.jar")
-    mainClassName = "com.gasolinerajsm.adengine.AdEngineApplicationKt"
-    enabled = false // Temporarily disable bootJar to debug ClassNotFoundException
-}
+// tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+//     archiveFileName.set("ad-engine.jar")
+//     mainClassName.set("com.gasolinerajsm.adengine.AdEngineApplicationKt")
+//     enabled.set(false) // Temporarily disable bootJar to debug ClassNotFoundException
+// }

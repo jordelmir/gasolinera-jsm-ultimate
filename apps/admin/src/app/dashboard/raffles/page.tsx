@@ -1,66 +1,70 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getRaffles, closeRafflePeriod, executeRaffleDraw, Raffle } from "@/lib/apiClient";
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { getRaffles, closeRafflePeriod, executeRaffleDraw, Raffle, RaffleWinner } from "@/lib/apiClient";
+import toast from 'react-hot-toast';
 
 export default function RafflesPage() {
-  const [raffles, setRaffles] = useState<Raffle[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchRaffles = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const data = await getRaffles();
-      setRaffles(data);
-    } catch (err: any) {
-      setError(err.message);
-      toast.error(`Error loading raffles: ${err.message}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data: raffles, isLoading, isError, error } = useQuery<Raffle[], Error>({ 
+    queryKey: ['raffles'],
+    queryFn: getRaffles,
+  });
 
-  useEffect(() => {
-    fetchRaffles();
-  }, []);
+  const closePeriodMutation = useMutation<Raffle, Error, string>({
+    mutationFn: closeRafflePeriod,
+    onSuccess: () => {
+      toast.success(`Period closed successfully!`);
+      queryClient.invalidateQueries({ queryKey: ['raffles'] }); // Invalidate and refetch raffles
+    },
+    onError: (err) => {
+      let errorMessage = `Error closing period: An unknown error occurred.`;
+      if (err.status) {
+        errorMessage = `Error closing period: Status ${err.status}`;
+      }
+      if (err.data && err.data.message) {
+        errorMessage = `Error closing period: ${err.data.message}`;
+      } else if (err.message) {
+        errorMessage = `Error closing period: ${err.message}`;
+      }
+      toast.error(errorMessage);
+    },
+  });
 
-  const handleClosePeriod = async (period: string) => {
+  const handleClosePeriod = (period: string) => {
     if (confirm(`¿Estás seguro de que quieres cerrar el período ${period} y construir el Merkle Tree?`)) {
-      try {
-        setIsLoading(true);
-        await closeRafflePeriod(period);
-        toast.success(`Period ${period} closed successfully!`);
-        fetchRaffles(); // Re-fetch after closing
-      } catch (err: any) {
-        setError(err.message);
-        toast.error(`Error closing period: ${err.message}`);
-      } finally {
-        setIsLoading(false);
-      }
+      closePeriodMutation.mutate(period);
     }
   };
 
-  const handleExecuteDraw = async (raffleId: number) => {
-    if (confirm(`¿Estás seguro de que quieres ejecutar el sorteo para el ID ${raffleId}? Esto es irreversible.`)) {
-      try {
-        setIsLoading(true);
-        await executeRaffleDraw(raffleId);
-        toast.success(`Raffle ${raffleId} drawn successfully!`);
-        fetchRaffles(); // Re-fetch after draw
-      } catch (err: any) {
-        setError(err.message);
-        toast.error(`Error executing draw: ${err.message}`);
-      } finally {
-        setIsLoading(false);
+  const executeDrawMutation = useMutation<RaffleWinner, Error, number>({
+    mutationFn: executeRaffleDraw,
+    onSuccess: () => {
+      toast.success(`Raffle drawn successfully!`);
+      queryClient.invalidateQueries({ queryKey: ['raffles'] }); // Invalidate and refetch raffles
+    },
+    onError: (err) => {
+      let errorMessage = `Error executing draw: An unknown error occurred.`;
+      if (err.status) {
+        errorMessage = `Error executing draw: Status ${err.status}`;
       }
+      if (err.data && err.data.message) {
+        errorMessage = `Error executing draw: ${err.data.message}`;
+      } else if (err.message) {
+        errorMessage = `Error executing draw: ${err.message}`;
+      }
+      toast.error(errorMessage);
+    },
+  });
+
+  const handleExecuteDraw = (raffleId: number) => {
+    if (confirm(`¿Estás seguro de que quieres ejecutar el sorteo para el ID ${raffleId}? Esto es irreversible.`)) {
+      executeDrawMutation.mutate(raffleId);
     }
   };
 
@@ -82,7 +86,7 @@ export default function RafflesPage() {
               <CardTitle>Sorteos Activos y Pasados</CardTitle>
               <CardDescription>Aquí podrás gestionar los sorteos de Puntos G.</CardDescription>
             </div>
-            <Button onClick={() => handleClosePeriod(getCurrentPeriod())} disabled={isLoading}>
+            <Button onClick={() => handleClosePeriod(getCurrentPeriod())} disabled={closePeriodMutation.isPending || executeDrawMutation.isPending}>
               Cerrar Período Actual ({getCurrentPeriod()})
             </Button>
           </div>
@@ -90,8 +94,8 @@ export default function RafflesPage() {
         <CardContent>
           {isLoading ? (
             <p>Cargando sorteos...</p>
-          ) : error ? (
-            <p className="text-red-500">Error: {error}</p>
+          ) : isError ? (
+            <p className="text-red-500">Error: {error?.message || 'An unknown error occurred.'}</p>
           ) : (
             <Table>
               <TableHeader>
@@ -114,7 +118,7 @@ export default function RafflesPage() {
                     <TableCell>{raffle.winnerEntryId || 'N/A'}</TableCell>
                     <TableCell>
                       {raffle.status === 'CLOSED' && (
-                        <Button size="sm" onClick={() => handleExecuteDraw(raffle.id!)} disabled={isLoading}>
+                        <Button size="sm" onClick={() => handleExecuteDraw(raffle.id!)} disabled={closePeriodMutation.isPending || executeDrawMutation.isPending}>
                           Ejecutar Sorteo
                         </Button>
                       )}
@@ -133,7 +137,7 @@ export default function RafflesPage() {
           )}
         </CardContent>
       </Card>
-      <ToastContainer position="bottom-right" />
+      
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import { Spinner } from "@/components/ui/spinner";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,19 +30,27 @@ export default function AdminLoginPage() {
   } = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "admin@puntog.com",
-      password: "admin123",
+      email: "",
+      password: "",
     },
   });
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
       const { token, refreshToken, user } = await loginAdmin(data.email, data.password);
-      login(token, user); // Assuming your store handles the user object
+      login(token, user, refreshToken); // Pass refreshToken to the store
       toast.success("Login successful!");
       router.push('/dashboard');
     } catch (err: any) {
-      toast.error(err.message || 'An unknown error occurred.');
+      let errorMessage = 'An unknown error occurred.';
+      if (err.status === 401) {
+        errorMessage = 'Invalid credentials. Please check your email and password.';
+      } else if (err.data && err.data.message) {
+        errorMessage = err.data.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      toast.error(errorMessage);
     }
   };
 

@@ -1,12 +1,12 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from '@tanstack/react-query';
 import { Spinner } from "@/components/ui/spinner";
 import { DollarSign, Package, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getTodaySummary } from "@/lib/apiClient";
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 
 
 interface SummaryData {
@@ -16,25 +16,10 @@ interface SummaryData {
 }
 
 export default function DashboardContent() {
-  const [summary, setSummary] = useState<SummaryData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchSummary = async () => {
-      try {
-        setIsLoading(true);
-        const data = await getTodaySummary();
-        setSummary(data);
-      } catch (err: any) {
-        setError(err.message);
-        toast.error(`Error loading dashboard summary: ${err.message}`);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchSummary();
-  }, []);
+  const { data: summary, isLoading, isError, error } = useQuery<SummaryData, Error>({ 
+    queryKey: ['todaySummary'],
+    queryFn: getTodaySummary,
+  });
 
   if (isLoading) {
     return (
@@ -44,11 +29,11 @@ export default function DashboardContent() {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
         <strong className="font-bold">Error!</strong>
-        <span className="block sm:inline">{error}</span>
+        <span className="block sm:inline">{error?.message || 'An unknown error occurred.'}</span>
       </div>
     );
   }

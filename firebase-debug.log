@@ -1,0 +1,64 @@
+[debug] [2025-08-19T17:13:09.355Z] ----------------------------------------------------------------------
+[debug] [2025-08-19T17:13:09.358Z] Command:       /data/data/com.termux/files/usr/bin/node /data/data/com.termux/files/usr/bin/firebase init
+[debug] [2025-08-19T17:13:09.358Z] CLI Version:   14.12.1
+[debug] [2025-08-19T17:13:09.358Z] Platform:      android
+[debug] [2025-08-19T17:13:09.358Z] Node Version:  v24.6.0
+[debug] [2025-08-19T17:13:09.358Z] Time:          Tue Aug 19 2025 11:13:09 GMT-0600 (Central Standard Time)
+[debug] [2025-08-19T17:13:09.359Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-08-19T17:13:09.535Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-08-19T17:13:09.535Z] > authorizing via signed-in user (jordelmir@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  /data/data/com.termux/files/home/gasolinera-jsm-ultimate
+
+Before we get started, keep in mind:
+
+  * You are initializing within an existing Firebase project directory
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2025-08-19T17:13:18.320Z] Using project from CLI flag: gasolinera-jsm-ultimate
+[debug] [2025-08-19T17:13:18.321Z] Checked if tokens are valid: true, expires at: 1755625416348
+[debug] [2025-08-19T17:13:18.322Z] Checked if tokens are valid: true, expires at: 1755625416348
+[debug] [2025-08-19T17:13:18.324Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/gasolinera-jsm-ultimate [none]
+[debug] [2025-08-19T17:13:19.016Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/gasolinera-jsm-ultimate 200
+[debug] [2025-08-19T17:13:19.017Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/gasolinera-jsm-ultimate {"projectId":"gasolinera-jsm-ultimate","projectNumber":"92092963271","displayName":"Gasolinera-jsm-ultimate","name":"projects/gasolinera-jsm-ultimate","resources":{"hostingSite":"gasolinera-jsm-ultimate"},"state":"ACTIVE","etag":"1_a9765736-e0b6-448a-95e6-54fedbc6f112"}
+[info] i  Using project gasolinera-jsm-ultimate (Gasolinera-jsm-ultimate) 
+[info] 
+=== Hosting Setup
+[debug] [2025-08-19T17:13:19.261Z] Checked if tokens are valid: true, expires at: 1755625416348
+[debug] [2025-08-19T17:13:19.261Z] Checked if tokens are valid: true, expires at: 1755625416348
+[debug] [2025-08-19T17:13:19.262Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/gasolinera-jsm-ultimate [none]
+[debug] [2025-08-19T17:13:19.610Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/gasolinera-jsm-ultimate 200
+[debug] [2025-08-19T17:13:19.611Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/gasolinera-jsm-ultimate {"projectId":"gasolinera-jsm-ultimate","projectNumber":"92092963271","displayName":"Gasolinera-jsm-ultimate","name":"projects/gasolinera-jsm-ultimate","resources":{"hostingSite":"gasolinera-jsm-ultimate"},"state":"ACTIVE","etag":"1_a9765736-e0b6-448a-95e6-54fedbc6f112"}
+[info] 
+[info] Your public directory is the folder (relative to your project directory) that
+[info] will contain Hosting assets to be uploaded with firebase deploy. If you
+[info] have a build process for your assets, use your build's output directory.
+[info] 
+[debug] [2025-08-19T18:17:17.433Z] ExitPromptError: User force closed the prompt with SIGINT
+    at Interface.sigint (/data/data/com.termux/files/usr/lib/node_modules/firebase-tools/node_modules/@inquirer/core/dist/commonjs/lib/create-prompt.js:101:37)
+    at Interface.emit (node:events:508:28)
+    at Interface.emit (node:domain:489:12)
+    at [_ttyWrite] [as _ttyWrite] (node:internal/readline/interface:1315:18)
+    at ReadStream.onkeypress (node:internal/readline/interface:284:20)
+    at ReadStream.emit (node:events:520:35)
+    at ReadStream.emit (node:domain:489:12)
+    at emitKeys (node:internal/readline/utils:371:14)
+    at emitKeys.next (<anonymous>)
+    at ReadStream.onData (node:internal/readline/emitKeypressEvents:64:36)
+[error] 
+[error] Error: An unexpected error has occurred.

@@ -1,11 +1,13 @@
 
 "use client";
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+
+const queryClient = new QueryClient();
+
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -30,9 +32,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   }, [token, pathname, router]);
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       {children}
-      <ToastContainer position="bottom-right" />
-    </>
+    </QueryClientProvider>
   );
 }

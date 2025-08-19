@@ -23,6 +23,7 @@ detekt {
 
 dependencies {
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.6") // Detekt formatting rules
+}
 
 group = "com.gasolinerajsm"
 version = "0.0.1-SNAPSHOT"
@@ -72,8 +73,8 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     }
 }
 
-tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
-    archiveFileName.set("raffle-service.jar")
-    mainClassName = "com.gasolinerajsm.raffleservice.RaffleServiceApplicationKt"
-    enabled = false // Temporarily disable bootJar to debug ClassNotFoundException
-}
+// tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
+//     archiveFileName.set("raffle-service.jar")
+//     mainClassName = "com.gasolinerajsm.raffleservice.RaffleServiceApplicationKt"
+//     enabled = false // Temporarily disable bootJar to debug ClassNotFoundException
+// }

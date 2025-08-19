@@ -23,6 +23,7 @@ detekt {
 
 dependencies {
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.6") // Detekt formatting rules
+}
 
 group = "com.gasolinerajsm"
 version = "0.0.1-SNAPSHOT"

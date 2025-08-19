@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Gasolinera Ultimate</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-900 text-white font-sans flex items-center justify-center min-h-screen p-4">
+
+    <main class="w-full max-w-4xl bg-slate-800 rounded-2xl shadow-2xl p-6 md:p-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-cyan-400">Gasolinera JSM Ultimate</h1>
+            <p class="text-slate-400 mt-2">Un control moderno para tus ventas de combustible.</p>
+        </header>
+
+        <!-- Formulario de Venta -->
+        <section id="venta-form" class="mb-8 bg-slate-700/50 p-6 rounded-xl">
+            <h2 class="text-2xl font-semibold mb-4 text-white">Registrar Venta</h2>
+            <form id="gas-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                    <label for="tipo-gasolina" class="block mb-2 text-sm font-medium text-slate-300">Tipo de Gasolina</label>
+                    <select id="tipo-gasolina" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-2.5 text-white focus:ring-cyan-500 focus:border-cyan-500 transition">
+                        <option value="95">Súper (95 Octanos)</option>
+                        <option value="91">Regular (91 Octanos)</option>
+                        <option value="diesel">Diesel</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="cantidad-litros" class="block mb-2 text-sm font-medium text-slate-300">Cantidad (Litros)</label>
+                    <input type="number" id="cantidad-litros" min="1" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-2.5 text-white focus:ring-cyan-500 focus:border-cyan-500 transition" placeholder="Ej: 20" required>
+                </div>
+                <div class="md:col-span-2 lg:col-span-1">
+                    <label for="paga-con" class="block mb-2 text-sm font-medium text-slate-300">Paga con ($)</label>
+                    <input type="number" id="paga-con" min="0" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-2.5 text-white focus:ring-cyan-500 focus:border-cyan-500 transition" placeholder="Ej: 50">
+                </div>
+                <div class="md:col-span-2 lg:col-span-1 flex items-end">
+                    <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold py-2.5 px-5 rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
+                        Realizar Venta
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Resumen y Totales -->
+        <section id="resumen" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-slate-700/50 p-6 rounded-xl text-center">
+                <h3 class="text-lg font-semibold text-slate-400 mb-2">Total Súper (95)</h3>
+                <p id="total-super" class="text-3xl font-bold text-green-400">0 L</p>
+            </div>
+            <div class="bg-slate-700/50 p-6 rounded-xl text-center">
+                <h3 class="text-lg font-semibold text-slate-400 mb-2">Total Regular (91)</h3>
+                <p id="total-regular" class="text-3xl font-bold text-yellow-400">0 L</p>
+            </div>
+            <div class="bg-slate-700/50 p-6 rounded-xl text-center">
+                <h3 class="text-lg font-semibold text-slate-400 mb-2">Total Diesel</h3>
+                <p id="total-diesel" class="text-3xl font-bold text-orange-400">0 L</p>
+            </div>
+        </section>
+
+        <!-- Historial de Ventas -->
+        <section id="historial-ventas">
+            <h2 class="text-2xl font-semibold mb-4 text-white">Historial de Ventas</h2>
+            <div class="bg-slate-700/50 rounded-xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-slate-300">
+                        <thead class="text-xs text-cyan-400 uppercase bg-slate-800">
+                            <tr>
+                                <th scope="col" class="px-6 py-3">Tipo</th>
+                                <th scope="col" class="px-6 py-3">Cantidad</th>
+                                <th scope="col" class="px-6 py-3">Precio/L</th>
+                                <th scope="col" class="px-6 py-3">Total Venta</th>
+                                <th scope="col" class="px-6 py-3">Fecha y Hora</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-ventas-body">
+                           <!-- Las filas de ventas se insertarán aquí -->
+                           <tr class="border-b border-slate-700">
+                                <td colspan="5" class="text-center px-6 py-8 text-slate-500">No hay ventas registradas todavía.</td>
+                           </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal para el Vuelto -->
+    <div id="modal-vuelto" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div class="bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center transform transition-all scale-95 opacity-0">
+            <h2 class="text-2xl font-bold mb-4 text-cyan-400">Transacción Exitosa</h2>
+            <p class="text-slate-300 mb-2">Total a pagar:</p>
+            <p id="modal-total" class="text-4xl font-bold text-white mb-6">$0.00</p>
+            <p class="text-slate-300 mb-2">Su vuelto es:</p>
+            <p id="modal-cambio" class="text-5xl font-extrabold text-green-400 mb-8">$0.00</p>
+            <button id="cerrar-modal" class="w-full bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold py-3 px-5 rounded-lg transition duration-300">
+                Cerrar
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

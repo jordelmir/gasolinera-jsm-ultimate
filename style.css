@@ -1,0 +1,35 @@
+/* Usamos 'Inter' como la fuente principal para un look moderno */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Estilos para el scrollbar para mantener la estética dark mode */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1e293b; /* slate-800 */
+}
+
+::-webkit-scrollbar-thumb {
+    background: #475569; /* slate-600 */
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #64748b; /* slate-500 */
+}
+
+/* Animaciones para el modal */
+#modal-vuelto.show .transform {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* Placeholder con mejor contraste */
+::placeholder {
+    color: #64748b; /* slate-500 */
+    opacity: 1;
+}

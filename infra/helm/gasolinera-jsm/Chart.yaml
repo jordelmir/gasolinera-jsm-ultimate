@@ -3,3 +3,22 @@ name: gasolinera-jsm
 description: A Helm chart for the Gasolinera JSM microservices
 version: 0.1.0
 appVersion: "1.0.0"
+dependencies:
+  - name: ad-engine
+    version: 0.1.0
+    repository: file://charts/ad-engine
+  - name: api-gateway
+    version: 0.1.0
+    repository: file://charts/api-gateway
+  - name: auth-service
+    version: 0.1.0
+    repository: file://charts/auth-service
+  - name: raffle-service
+    version: 0.1.0
+    repository: file://charts/raffle-service
+  - name: redemption-service
+    version: 0.1.0
+    repository: file://charts/redemption-service
+  - name: station-service
+    version: 0.1.0
+    repository: file://charts/station-service
