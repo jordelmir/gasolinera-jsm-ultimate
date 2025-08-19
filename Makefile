@@ -86,8 +86,9 @@ format:
 
 check-deps:
 	@echo "Checking for outdated dependencies..."
-	npm outdated# Mobil
-e development
+	npm outdated
+
+# Mobile development
 client-mobile:
 	@echo "Starting client mobile app..."
 	cd apps/client-mobile && npm start

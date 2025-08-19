@@ -68,17 +68,16 @@ export default function DashboardPage() {
           <div className="flex justify-between items-center py-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                Dashboard Gasolinera JSM
+                Dashboard Principal
               </h1>
               <p className="text-sm text-gray-500 mt-1">
-                Panel de control para propietarios
+                Resumen general de tu negocio
               </p>
             </div>
             <div className="flex items-center space-x-4">
               <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                 Generar Reporte
               </button>
-              <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
             </div>
           </div>
         </div>
