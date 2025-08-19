@@ -30,8 +30,8 @@ export default function AdminLoginPage() {
   } = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "admin@puntog.com",
-      password: "admin123",
+      email: "",
+      password: "",
     },
   });
 
