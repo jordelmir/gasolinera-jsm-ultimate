@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  postgres:
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-puntog}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  rabbitmq:
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', 'ping']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  vault:
+    healthcheck:
+      test: ['CMD', 'vault', 'status']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Frontend services for development
+  admin-dev:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile.dev
+    container_name: admin-dev
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./apps/admin:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+
+  advertiser-dev:
+    build:
+      context: .
+      dockerfile: apps/advertiser/Dockerfile.dev
+    container_name: advertiser-dev
+    ports:
+      - '3001:3001'
+    volumes:
+      - ./apps/advertiser:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8080

@@ -3,7 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "vercel-build": "npx nx build admin --prod"
+    "vercel-build": "npx nx build admin --prod",
+    "dev": "nx serve admin",
+    "build": "nx build admin",
+    "test": "nx run-many --target=test --all",
+    "lint": "nx run-many --target=lint --all",
+    "format": "nx format:write",
+    "affected:test": "nx affected --target=test",
+    "affected:build": "nx affected --target=build",
+    "graph": "nx graph"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.6.0",
