@@ -13,8 +13,8 @@
 	<error line="18" column="64" severity="warning" message="This expression contains a magic number. Consider defining it to a well named constant." source="detekt.MagicNumber" />
 </file>
 <file name="/data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/controller/AuthController.kt">
-	<error line="1" column="1" severity="warning" message="File must end with a newline (\n)" source="detekt.FinalNewline" />
 	<error line="13" column="1" severity="warning" message="Wildcard import" source="detekt.NoWildcardImports" />
+	<error line="1" column="1" severity="warning" message="File must end with a newline (\n)" source="detekt.FinalNewline" />
 	<error line="3" column="1" severity="warning" message="Imports must be ordered in lexicographic order without any empty lines in-between with &quot;java&quot;, &quot;javax&quot;, &quot;kotlin&quot; and aliases in the end" source="detekt.ImportOrdering" />
 	<error line="96" column="2" severity="warning" message="The file /data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/controller/AuthController.kt is not ending with a new line." source="detekt.NewLineAtEndOfFile" />
 	<error line="13" column="1" severity="warning" message="org.springframework.web.bind.annotation.* is a wildcard import. Replace it with fully qualified imports." source="detekt.WildcardImport" />
@@ -49,8 +49,8 @@
 	<error line="15" column="2" severity="warning" message="The file /data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/dto/AdminLoginRequest.kt is not ending with a new line." source="detekt.NewLineAtEndOfFile" />
 </file>
 <file name="/data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/model/User.kt">
-	<error line="1" column="1" severity="warning" message="File must end with a newline (\n)" source="detekt.FinalNewline" />
 	<error line="3" column="1" severity="warning" message="Wildcard import" source="detekt.NoWildcardImports" />
+	<error line="1" column="1" severity="warning" message="File must end with a newline (\n)" source="detekt.FinalNewline" />
 	<error line="27" column="2" severity="warning" message="The file /data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/model/User.kt is not ending with a new line." source="detekt.NewLineAtEndOfFile" />
 	<error line="3" column="1" severity="warning" message="jakarta.persistence.* is a wildcard import. Replace it with fully qualified imports." source="detekt.WildcardImport" />
 </file>

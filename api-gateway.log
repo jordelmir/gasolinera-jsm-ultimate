@@ -1,0 +1,34 @@
+
+FAILURE: Build completed with 2 failures.
+
+1: Task failed with an exception.
+-----------
+* What went wrong:
+A problem occurred configuring project ':services:ad-engine'.
+> Failed to calculate the value of task ':services:ad-engine:compileJava' property 'javaCompiler'.
+   > Service 'SystemInfo' is not available (os=Linux 5.15.167-android13-8-00008-g31975b884c4b-ab13216403 aarch64, enabled=false).
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+==============================================================================
+
+2: Task failed with an exception.
+-----------
+* What went wrong:
+Failed to query the value of property 'buildFlowServiceProperty'.
+> Could not isolate value org.jetbrains.kotlin.gradle.plugin.statistics.BuildFlowService$Parameters_Decorated@1c1335c8 of type BuildFlowService.Parameters
+   > A problem occurred configuring project ':services:ad-engine'.
+      > Failed to calculate the value of task ':services:ad-engine:compileJava' property 'javaCompiler'.
+         > Service 'SystemInfo' is not available (os=Linux 5.15.167-android13-8-00008-g31975b884c4b-ab13216403 aarch64, enabled=false).
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+==============================================================================
+
+BUILD FAILED in 1s

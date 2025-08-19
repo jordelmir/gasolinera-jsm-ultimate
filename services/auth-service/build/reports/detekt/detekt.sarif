@@ -36,28 +36,6 @@
                 },
                 "region": {
                   "endColumn": 2,
-                  "endLine": 1,
-                  "startColumn": 1,
-                  "startLine": 1
-                }
-              }
-            }
-          ],
-          "message": {
-            "text": "File must end with a newline (\\n)"
-          },
-          "ruleId": "detekt.formatting.FinalNewline"
-        },
-        {
-          "level": "warning",
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "file:///data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/controller/AuthController.kt"
-                },
-                "region": {
-                  "endColumn": 2,
                   "endLine": 13,
                   "startColumn": 1,
                   "startLine": 13
@@ -69,6 +47,28 @@
             "text": "Wildcard import"
           },
           "ruleId": "detekt.formatting.NoWildcardImports"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/controller/AuthController.kt"
+                },
+                "region": {
+                  "endColumn": 2,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "File must end with a newline (\\n)"
+          },
+          "ruleId": "detekt.formatting.FinalNewline"
         },
         {
           "level": "warning",
@@ -234,28 +234,6 @@
                 },
                 "region": {
                   "endColumn": 2,
-                  "endLine": 1,
-                  "startColumn": 1,
-                  "startLine": 1
-                }
-              }
-            }
-          ],
-          "message": {
-            "text": "File must end with a newline (\\n)"
-          },
-          "ruleId": "detekt.formatting.FinalNewline"
-        },
-        {
-          "level": "warning",
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "file:///data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/model/User.kt"
-                },
-                "region": {
-                  "endColumn": 2,
                   "endLine": 3,
                   "startColumn": 1,
                   "startLine": 3
@@ -267,6 +245,28 @@
             "text": "Wildcard import"
           },
           "ruleId": "detekt.formatting.NoWildcardImports"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///data/data/com.termux/files/home/gasolinera-jsm-ultimate/services/auth-service/src/main/kotlin/com/gasolinerajsm/authservice/model/User.kt"
+                },
+                "region": {
+                  "endColumn": 2,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "File must end with a newline (\\n)"
+          },
+          "ruleId": "detekt.formatting.FinalNewline"
         },
         {
           "level": "warning",

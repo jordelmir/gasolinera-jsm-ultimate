@@ -640,4 +640,4 @@ jakarta.persistence.* is a wildcard import. Replace it with fully qualified impo
 
 ```
 
-generated with [detekt version 1.23.6](https://detekt.dev/) on 2025-08-19 19:18:12 UTC
+generated with [detekt version 1.23.6](https://detekt.dev/) on 2025-08-19 19:30:18 UTC

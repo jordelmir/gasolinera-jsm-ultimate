@@ -1,0 +1,8 @@
+{
+  "stations": [
+    { "id": 1, "name": "Estación Central", "address": "Av. 123", "lat": -34.6, "lng": -58.4 }
+  ],
+  "users": [
+    { "id": 1, "email": "admin@demo.com", "role": "ADMIN" }
+  ]
+}

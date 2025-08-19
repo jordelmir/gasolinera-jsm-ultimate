@@ -5,7 +5,6 @@ import { DollarSign, Megaphone, TrendingUp } from "lucide-react";
 import { DollarSign, Megaphone, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import { getCampaignPerformanceSummary } from "@/lib/apiClient"; // To be implemented
 import { toast } from 'react-toastify';
 
 
@@ -25,7 +24,8 @@ export default function AdvertiserDashboardPage() {
       try {
         setIsLoading(true);
         // Mock data for now, replace with actual API call
-        const data = await getCampaignPerformanceSummary();
+        const response = await fetch("http://localhost:3001/campaignPerformanceSummary");
+        const data = await response.json();
         setSummary(data);
       } catch (err: any) {
         setError(err.message);
