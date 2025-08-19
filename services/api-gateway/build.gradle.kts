@@ -36,4 +36,5 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
     archiveFileName.set("app.jar")
     mainClassName = "com.gasolinerajsm.apigateway.ApiGatewayApplicationKt"
+    enabled = false // Temporarily disable bootJar to debug ClassNotFoundException
 }

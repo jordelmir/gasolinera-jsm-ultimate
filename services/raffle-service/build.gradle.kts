@@ -75,4 +75,5 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
     archiveFileName.set("raffle-service.jar")
     mainClassName = "com.gasolinerajsm.raffleservice.RaffleServiceApplicationKt"
+    enabled = false // Temporarily disable bootJar to debug ClassNotFoundException
 }

@@ -98,6 +98,8 @@ Una vez que `make dev` se complete, los siguientes servicios estarán disponible
 -   `make k8s-up`: Despliega la aplicación en un clúster de Kubernetes local.
 -   `make k8s-down`: Elimina el despliegue de Kubernetes.
 
+This is a demo line for a Pull Request.
+
 ## FAQ
 
 **¿Cómo genero nuevos códigos QR firmados?**
