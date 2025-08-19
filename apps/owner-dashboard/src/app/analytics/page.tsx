@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import {
   ChartBarIcon,
   CalendarIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
   UsersIcon,
   TicketIcon,
   CurrencyDollarIcon,
@@ -190,7 +190,7 @@ export default function AnalyticsPage() {
                   {totalTickets.toLocaleString()}
                 </p>
                 <div className="flex items-center mt-1">
-                  <TrendingUpIcon className="w-4 h-4 text-green-500" />
+                  <ArrowTrendingUpIcon className="w-4 h-4 text-green-500" />
                   <span className="text-sm text-green-600 ml-1">+12.5%</span>
                 </div>
               </div>
@@ -206,7 +206,7 @@ export default function AnalyticsPage() {
                   ₡{totalRevenue.toLocaleString()}
                 </p>
                 <div className="flex items-center mt-1">
-                  <TrendingUpIcon className="w-4 h-4 text-green-500" />
+                  <ArrowTrendingUpIcon className="w-4 h-4 text-green-500" />
                   <span className="text-sm text-green-600 ml-1">+8.3%</span>
                 </div>
               </div>
@@ -224,7 +224,7 @@ export default function AnalyticsPage() {
                   {totalUsers.toLocaleString()}
                 </p>
                 <div className="flex items-center mt-1">
-                  <TrendingDownIcon className="w-4 h-4 text-red-500" />
+                  <ArrowTrendingDownIcon className="w-4 h-4 text-red-500" />
                   <span className="text-sm text-red-600 ml-1">-2.1%</span>
                 </div>
               </div>
@@ -242,7 +242,7 @@ export default function AnalyticsPage() {
                   {avgConversion.toFixed(1)}%
                 </p>
                 <div className="flex items-center mt-1">
-                  <TrendingUpIcon className="w-4 h-4 text-green-500" />
+                  <ArrowTrendingUpIcon className="w-4 h-4 text-green-500" />
                   <span className="text-sm text-green-600 ml-1">+5.7%</span>
                 </div>
               </div>
@@ -496,7 +496,7 @@ export default function AnalyticsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <div className="flex items-center">
-                        <TrendingUpIcon className="w-4 h-4 text-green-500 mr-1" />
+                        <ArrowTrendingUpIcon className="w-4 h-4 text-green-500 mr-1" />
                         <span className="text-green-600">
                           +{(Math.random() * 20).toFixed(1)}%
                         </span>

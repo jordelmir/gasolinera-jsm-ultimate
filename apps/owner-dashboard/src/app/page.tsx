@@ -4,10 +4,11 @@ import React from 'react';
 import {
   ChartBarIcon,
   BuildingStorefrontIcon,
-  UseTicketIcon,
+  UsersIcon,
+  TicketIcon,
   TrophyIcon,
-pIcon,
-  ArrowDownIcon
+  ArrowUpIcon,
+  ArrowDownIcon,
 } from '@heroicons/react/24/outline';
 import {
   LineChart,
@@ -19,47 +20,42 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell
 } from 'recharts';
 
-// Mock data - En producción vendría de la API
-const mockData = {
-  overview: {
-    totalStations: 12,
-    totalEmployees: 48,
-    totalTicketsToday: 1247,
-    totalRevenue: 2450000,
-    weeklyGrowth: 12.5,
-    monthlyGrowth: -3.2
-  },
-  weeklyData: [
-    { day: 'Lun', tickets: 180, revenue: 450000 },
-    { day: 'Mar', tickets: 220, revenue: 550000 },
-    { day: 'Mié', tickets: 190, revenue: 475000 },
-    { day: 'Jue', tickets: 280, revenue: 700000 },
-    { day: 'Vie', tickets: 320, revenue: 800000 },
-    { day: 'Sáb', tickets: 380, revenue: 950000 },
-    { day: 'Dom', tickets: 290, revenue: 725000 }
-  ],
-  topStations: [
-    { name: 'Estación Centro', tickets: 245, revenue: 612500, growth: 15.2 },
-    { name: 'Estación Norte', tickets: 198, revenue: 495000, growth: 8.7 },
-    { name: 'Estación Sur', tickets: 167, revenue: 417500, growth: -2.1 },
-    { name: 'Estación Este', tickets: 134, revenue: 335000, growth: 22.3 }
-  ],
-  employeePerformance: [
-    { name: 'Juan Pérez', station: 'Centro', tickets: 45, conversion: 78 },
-    { name: 'María González', station: 'Norte', tickets: 38, conversion: 82 },
-    { name: 'Carlos Rodríguez', station: 'Sur', tickets: 42, conversion: 75 },
-    { name: 'Ana Jiménez', station: 'Este', tickets: 35, conversion: 88 }
-  ]
-};
-
-const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
-
 export default function DashboardPage() {
+  // Mock data
+  const mockData = {
+    overview: {
+      totalStations: 12,
+      totalEmployees: 48,
+      totalTicketsToday: 1247,
+      totalRevenue: 2450000,
+      weeklyGrowth: 12.5,
+      monthlyGrowth: -3.2,
+    },
+    weeklyData: [
+      { day: 'Lun', tickets: 180, revenue: 450000 },
+      { day: 'Mar', tickets: 220, revenue: 550000 },
+      { day: 'Mié', tickets: 190, revenue: 475000 },
+      { day: 'Jue', tickets: 280, revenue: 700000 },
+      { day: 'Vie', tickets: 320, revenue: 800000 },
+      { day: 'Sáb', tickets: 380, revenue: 950000 },
+      { day: 'Dom', tickets: 290, revenue: 725000 },
+    ],
+    topStations: [
+      { name: 'Estación Centro', tickets: 245, revenue: 612500, growth: 15.2 },
+      { name: 'Estación Norte', tickets: 198, revenue: 495000, growth: 8.7 },
+      { name: 'Estación Sur', tickets: 167, revenue: 417500, growth: -2.1 },
+      { name: 'Estación Este', tickets: 134, revenue: 335000, growth: 22.3 },
+    ],
+    employeePerformance: [
+      { name: 'Juan Pérez', station: 'Centro', tickets: 45, conversion: 78 },
+      { name: 'María González', station: 'Norte', tickets: 38, conversion: 82 },
+      { name: 'Carlos Rodríguez', station: 'Sur', tickets: 42, conversion: 75 },
+      { name: 'Ana Jiménez', station: 'Este', tickets: 35, conversion: 88 },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -92,6 +88,7 @@ export default function DashboardPage() {
                 <p className="text-sm font-medium text-gray-600">Estaciones</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {mockData.overview.totalStations}
+                </p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                 <BuildingStorefrontIcon className="w-6 h-6 text-blue-600" />
@@ -189,7 +186,10 @@ export default function DashboardPage() {
                 <XAxis dataKey="day" />
                 <YAxis />
                 <Tooltip
-                  formatter={(value) => [`₡${value.toLocaleString()}`, 'Ingresos']}
+                  formatter={(value) => [
+                    `₡${Number(value).toLocaleString()}`,
+                    'Ingresos',
+                  ]}
                 />
                 <Bar dataKey="revenue" fill="#10B981" radius={[4, 4, 0, 0]} />
               </BarChart>
@@ -209,7 +209,10 @@ export default function DashboardPage() {
             <div className="p-6">
               <div className="space-y-4">
                 {mockData.topStations.map((station, index) => (
-                  <div key={station.name} className="flex items-center justify-between">
+                  <div
+                    key={station.name}
+                    className="flex items-center justify-between"
+                  >
                     <div className="flex items-center">
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
                         <span className="text-sm font-semibold text-blue-600">
@@ -217,9 +220,12 @@ export default function DashboardPage() {
                         </span>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">{station.name}</p>
+                        <p className="font-medium text-gray-900">
+                          {station.name}
+                        </p>
                         <p className="text-sm text-gray-500">
-                          {station.tickets} tickets • ₡{station.revenue.toLocaleString()}
+                          {station.tickets} tickets • ₡
+                          {station.revenue.toLocaleString()}
                         </p>
                       </div>
                     </div>
@@ -229,10 +235,13 @@ export default function DashboardPage() {
                       ) : (
                         <ArrowDownIcon className="w-4 h-4 text-red-500" />
                       )}
-                      <span className={`text-sm ml-1 ${
-                        station.growth > 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {station.growth > 0 ? '+' : ''}{station.growth}%
+                      <span
+                        className={`text-sm ml-1 ${
+                          station.growth > 0 ? 'text-green-600' : 'text-red-600'
+                        }`}
+                      >
+                        {station.growth > 0 ? '+' : ''}
+                        {station.growth}%
                       </span>
                     </div>
                   </div>
@@ -251,12 +260,19 @@ export default function DashboardPage() {
             <div className="p-6">
               <div className="space-y-4">
                 {mockData.employeePerformance.map((employee) => (
-                  <div key={employee.name} className="flex items-center justify-between">
+                  <div
+                    key={employee.name}
+                    className="flex items-center justify-between"
+                  >
                     <div className="flex items-center">
                       <div className="w-10 h-10 bg-gray-200 rounded-full mr-3"></div>
                       <div>
-                        <p className="font-medium text-gray-900">{employee.name}</p>
-                        <p className="text-sm text-gray-500">{employee.station}</p>
+                        <p className="font-medium text-gray-900">
+                          {employee.name}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {employee.station}
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">
