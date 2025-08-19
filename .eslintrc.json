@@ -1,0 +1,143 @@
+{
+  "root": true,
+  "ignorePatterns": [
+    "**/*",
+    "!.vscode",
+    "!.idea",
+    "!.git",
+    "!.nx",
+    "!.husky",
+    ".next",
+    "dist",
+    "tmp",
+    "node_modules",
+    "build",
+    "coverage",
+    "firebase-debug.log",
+    "gradle-8.8-bin.zip",
+    "*.yml",
+    "*.md",
+    "*.json",
+    "*.html",
+    "*.css",
+    "*.js",
+    "*.jsx",
+    "*.ts",
+    "*.tsx",
+    "*.json",
+    "*.yaml",
+    "*.tf",
+    "*.proto",
+    "*.kts",
+    "*.gradle",
+    "*.properties",
+    "*.sh",
+    "*.log",
+    "*.zip",
+    "*.iml",
+    "*.ipr",
+    "*.iws",
+    "*.class",
+    "*.jar",
+    "*.war",
+    "*.ear",
+    "*.car",
+    "*.rar",
+    "*.zip",
+    "*.gz",
+    "*.tgz",
+    "*.bz2",
+    "*.bzip2",
+    "*.xz",
+    "*.lzma",
+    "*.7z",
+    "*.rar",
+    "*.tar",
+    "*.tar.gz",
+    "*.tar.bz2",
+    "*.tar.xz",
+    "*.tar.lzma",
+    "*.tar.7z",
+    "*.tar.rar",
+    "*.tar.z",
+    "*.zip",
+    "*.jar",
+    "*.war",
+    "*.ear",
+    "*.car",
+    "*.rar",
+    "*.zip",
+    "*.gz",
+    "*.tgz",
+    "*.bz2",
+    "*.bzip2",
+    "*.xz",
+    "*.lzma",
+    "*.7z",
+    "*.rar",
+    "*.tar",
+    "*.tar.gz",
+    "*.tar.bz2",
+    "*.tar.xz",
+    "*.tar.lzma",
+    "*.tar.7z",
+    "*.tar.rar",
+    "*.tar.z"
+  ],
+  "plugins": [
+    "@nx"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "*.ts",
+        "*.tsx",
+        "*.js",
+        "*.jsx"
+      ],
+      "rules": {
+        "@nx/enforce-module-boundaries": [
+          "error",
+          {
+            "enforceBuildableLibDependency": true,
+            "allowCircularDependencies": false,
+            "allowExternalImports": true,
+            "depConstraints": [
+              {
+                "sourceTag": "*",
+                "onlyDependOnLibsWithTags": [
+                  "*"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "*.ts",
+        "*.tsx"
+      ],
+      "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "plugin:@nx/typescript"
+      ],
+      "rules": {}
+    },
+    {
+      "files": [
+        "*.js",
+        "*.jsx"
+      ],
+      "extends": [
+        "eslint:recommended",
+        "plugin:@nx/javascript"
+      ],
+      "rules": {}
+    }
+  ]
+}
