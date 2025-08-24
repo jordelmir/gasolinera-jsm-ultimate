@@ -1,0 +1,34 @@
+{
+  "Default": {
+    "FixedGridWidth": true,
+    "Browser": {
+      "Theme": "dark",
+      "ShowSystemObjects": false,
+      "BrowserTreeState": {}
+    },
+    "SQLEditor": {
+      "auto_save_query": true,
+      "auto_save_query_interval": 10,
+      "check_for_updates": true,
+      "code_folding": true,
+      "copy_sql_to_query_tool": true,
+      "csv_quoting": "strings",
+      "explain_verbose": true,
+      "font_size": "1.0em",
+      "history_size": 20,
+      "indent_with_tabs": false,
+      "insert_pair_brackets": true,
+      "line_wrapping": true,
+      "on_demand_record_count": true,
+      "results_grid_view": "grid",
+      "tab_size": 2,
+      "use_spaces": "yes",
+      "word_wrap": true
+    },
+    "Display": {
+      "null_string": "[NULL]",
+      "max_records": 1000,
+      "binary_placeholder": "[BINARY DATA]"
+    }
+  }
+}

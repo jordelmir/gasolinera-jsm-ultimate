@@ -1,13 +1,211 @@
 {
-  "servers": {
-    "nx-mcp": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "nx-mcp@latest",
-        "."
-      ]
+  "mcpServers": {
+    "fetch": {
+      "command": "/Users/Jorge/.local/bin/uvx",
+      "args": ["mcp-server-fetch"],
+      "env": { "FASTMCP_LOG_LEVEL": "WARN" },
+      "disabled": false,
+      "autoApprove": ["fetch"]
+    },
+    "postgres": {
+      "command": "/Users/Jorge/.local/bin/uvx",
+      "args": ["mcp-server-postgres", "postgresql://your_user:your_password@your_host:5432/your_db"],
+      "env": { "FASTMCP_LOG_LEVEL": "WARN" },
+      "disabled": false,
+      "autoApprove": ["query", "list_tables", "describe_table"]
+    },
+    "git": {
+      "command": "/Users/Jorge/.local/bin/uvx",
+      "args": ["mcp-server-git"],
+      "env": { "FASTMCP_LOG_LEVEL": "INFO" },
+      "disabled": false,
+      "autoApprove": ["git_status", "git_log", "git_diff", "git_branch", "git_pull"]
+    },
+    "time": {
+      "command": "/Users/Jorge/.local/bin/uvx",
+      "args": ["mcp-server-time"],
+      "env": { "FASTMCP_LOG_LEVEL": "WARN" },
+      "disabled": false,
+      "autoApprove": ["get_current_time", "get_timezone", "format_time"]
+    },
+    "sqlite": {
+      "command": "/Users/Jorge/.local/bin/uvx",
+      "args": ["mcp-server-sqlite", "--db-path", "/Users/Jorge/Desktop/gasolinera-jsm-ultimate1111/local_database.db"],
+      "env": { "FASTMCP_LOG_LEVEL": "WARN" },
+      "disabled": false,
+      "autoApprove": ["query", "list_tables", "describe_table"]
+    },
+    "memory": {
+      "command": "/Users/Jorge/.local/bin/uvx",
+      "args": ["mcp-memory"],
+      "env": { "FASTMCP_LOG_LEVEL": "INFO" },
+      "disabled": false,
+      "autoApprove": ["create_memory", "search_memory", "add_note"]
+    },
+    "docker": {
+      "command": "/Users/Jorge/.local/bin/uvx",
+      "args": ["mcp-server-docker"],
+      "env": { "FASTMCP_LOG_LEVEL": "INFO" },
+      "disabled": false,
+      "autoApprove": ["list_containers", "list_images", "container_logs", "container_stats", "list_networks", "list_volumes", "inspect_container", "inspect_image"]
+    },
+    "kubernetes": {
+      "command": "/Users/Jorge/.local/bin/uvx",
+      "args": ["mcp-server-kubernetes"],
+      "env": { "KUBECONFIG": "/Users/Jorge/.kube/config", "FASTMCP_LOG_LEVEL": "INFO" },
+      "disabled": false,
+      "autoApprove": ["get_pods", "get_services", "get_deployments", "get_namespaces", "get_nodes", "describe_pod", "describe_service", "describe_deployment", "get_logs", "get_events", "get_configmaps", "get_secrets"]
+    },
+    "npm": {
+      "command": "npm", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["list", "view", "search", "outdated", "docs", "repo"]
+    },
+    "pip": {
+      "command": "pip", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["list", "freeze", "show", "search"]
+    },
+    "aws": {
+      "command": "aws", "args": [], "env": { "AWS_PROFILE": "default" }, "disabled": false,
+      "autoApprove": ["s3 ls", "ec2 describe-instances", "lambda list-functions", "iam list-users", "sts get-caller-identity"]
+    },
+    "gcloud": {
+      "command": "gcloud", "args": [], "env": { "GOOGLE_APPLICATION_CREDENTIALS": "/Users/Jorge/.config/gcloud/application_default_credentials.json" }, "disabled": false,
+      "autoApprove": ["compute instances list", "sql instances list", "functions list", "projects list", "auth list"]
+    },
+    "azure": {
+      "command": "az", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["vm list", "storage account list", "functionapp list", "group list", "account show"]
+    },
+    "terraform": {
+      "command": "terraform", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["plan", "validate", "fmt", "show", "workspace", "list"]
+    },
+    "ansible": {
+      "command": "ansible", "args": ["-i", "inventory.ini"], "env": {}, "disabled": false,
+      "autoApprove": ["--list-hosts", "ping", "-m setup"]
+    },
+    "helm": {
+      "command": "helm", "args": [], "env": { "KUBECONFIG": "/Users/Jorge/.kube/config" }, "disabled": false,
+      "autoApprove": ["list", "search", "status", "repo list", "history"]
+    },
+    "docker-compose": {
+      "command": "docker-compose", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["ps", "logs", "config", "top"]
+    },
+    "mysql": {
+      "command": "mysql", "args": ["--host=your_host", "--user=your_user", "--password=your_password", "your_db"], "env": {}, "disabled": false,
+      "autoApprove": ["-e 'SHOW DATABASES;'", "-e 'SHOW TABLES;'", "-e 'STATUS;'"]
+    },
+    "redis-cli": {
+      "command": "redis-cli", "args": ["-h", "your_host", "-p", "6379"], "env": {}, "disabled": false,
+      "autoApprove": ["ping", "info", "dbsize", "keys *", "client list"]
+    },
+    "mongodb": {
+      "command": "mongosh", "args": ["mongodb://your_user:your_password@your_host/your_db"], "env": {}, "disabled": false,
+      "autoApprove": ["--eval 'show dbs'", "--eval 'show collections'", "--eval 'db.stats()'"]
+    },
+    "nginx": {
+      "command": "nginx", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["-t", "-v"]
+    },
+    "systemctl": {
+      "command": "systemctl", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["status", "is-active", "is-enabled", "list-units", "list-unit-files"]
+    },
+    "journalctl": {
+      "command": "journalctl", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["-u", "-f", "--list-boots", "-n"]
+    },
+    "htop": {
+      "command": "htop", "args": [], "env": {}, "disabled": false, "autoApprove": []
+    },
+    "grep": {
+      "command": "grep", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["-r", "-i", "-l", "-c", "-n"]
+    },
+    "awk": {
+      "command": "awk", "args": [], "env": {}, "disabled": false, "autoApprove": []
+    },
+    "sed": {
+      "command": "sed", "args": [], "env": {}, "disabled": false, "autoApprove": []
+    },
+    "jq": {
+      "command": "jq", "args": [], "env": {}, "disabled": false, "autoApprove": ["."]
+    },
+    "yq": {
+      "command": "yq", "args": [], "env": {}, "disabled": false, "autoApprove": ["eval", "read"]
+    },
+    "curl": {
+      "command": "curl", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["-I", "-L", "-s", "-o /dev/null", "-w '%{http_code}'"]
+    },
+    "wget": {
+      "command": "wget", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["--spider", "--server-response"]
+    },
+    "netstat": {
+      "command": "netstat", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["-tuln", "-i", "-r", "-c"]
+    },
+    "ss": {
+      "command": "ss", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["-tuln", "-a", "-i", "-p"]
+    },
+    "iptables": {
+      "command": "iptables", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["-L", "-S", "-v", "-n"]
+    },
+    "ufw": {
+      "command": "ufw", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["status", "status numbered"]
+    },
+    "openssl": {
+      "command": "openssl", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["version", "s_client", "x509"]
+    },
+    "ssh-keygen": {
+      "command": "ssh-keygen", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["-l", "-f"]
+    },
+    "chmod": {
+      "command": "chmod", "args": [], "env": {}, "disabled": false, "autoApprove": []
+    },
+    "chown": {
+      "command": "chown", "args": [], "env": {}, "disabled": false, "autoApprove": []
+    },
+    "rsync": {
+      "command": "rsync", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["--dry-run", "-v", "-n"]
+    },
+    "tar": {
+      "command": "tar", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["-tvf"]
+    },
+    "zip": {
+      "command": "zip", "args": [], "env": {}, "disabled": false, "autoApprove": []
+    },
+    "unzip": {
+      "command": "unzip", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["-l"]
+    },
+    "df": {
+      "command": "df", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["-h", "-i", "-T"]
+    },
+    "du": {
+      "command": "du", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["-sh", "-h", "-c"]
+    },
+    "ps": {
+      "command": "ps", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["aux", "ef", "-u", "jorge"]
+    },
+    "kill": {
+      "command": "kill", "args": [], "env": {}, "disabled": false, "autoApprove": []
+    },
+    "crontab": {
+      "command": "crontab", "args": [], "env": {}, "disabled": false,
+      "autoApprove": ["-l"]
     }
   }
 }

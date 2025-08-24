@@ -48,6 +48,20 @@ Este documento explica cómo configurar los servidores MCP para el proyecto Gaso
 - **Autenticación**: Bearer token de GitHub
 - **Uso**: Repositorios, issues, pull requests, búsquedas
 
+### 8. Docker Server
+
+- **Propósito**: Gestión de contenedores Docker
+- **Paquete**: `mcp-server-docker`
+- **Uso**: Contenedores, imágenes, redes, volúmenes, logs
+- **Requisitos**: Docker Desktop instalado y corriendo
+
+### 9. Kubernetes Server
+
+- **Propósito**: Gestión de clusters Kubernetes
+- **Paquete**: `mcp-server-kubernetes`
+- **Configuración**: Requiere `~/.kube/config`
+- **Uso**: Pods, servicios, deployments, namespaces, logs
+
 ## Configuración
 
 ### Archivo de Configuración
