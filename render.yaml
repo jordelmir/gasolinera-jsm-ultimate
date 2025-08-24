@@ -1,0 +1,57 @@
+databases:
+  - name: postgres-db-puntog
+    databaseName: puntog
+    user: puntog
+    plan: free
+    postgresMajorVersion: 16
+
+  - name: redis-cache-puntog
+    type: redis
+    plan: free
+    ipAllowList: []
+
+services:
+  - type: web
+    name: api-gateway
+    plan: free
+    runtime: docker
+    dockerfilePath: ./services/api-gateway/Dockerfile
+    dockerContext: .
+    envVars:
+      - fromGroup: puntog-secrets
+
+  - type: pserv
+    name: auth-service
+    plan: free
+    runtime: docker
+    dockerfilePath: ./services/auth-service/Dockerfile
+    dockerContext: .
+    envVars:
+      - fromGroup: puntog-secrets
+
+  - type: pserv
+    name: redemption-service
+    plan: free
+    runtime: docker
+    dockerfilePath: ./services/redemption-service/Dockerfile
+    dockerContext: .
+    envVars:
+      - fromGroup: puntog-secrets
+
+  - type: pserv
+    name: ad-engine
+    plan: free
+    runtime: docker
+    dockerfilePath: ./services/ad-engine/Dockerfile
+    dockerContext: .
+    envVars:
+      - fromGroup: puntog-secrets
+
+  - type: pserv
+    name: raffle-service
+    plan: free
+    runtime: docker
+    dockerfilePath: ./services/raffle-service/Dockerfile
+    dockerContext: .
+    envVars:
+      - fromGroup: puntog-secrets

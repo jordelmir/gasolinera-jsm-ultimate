@@ -1,0 +1,26 @@
+gasolinera:
+  api:
+    baseUrl: 'http://localhost'
+    timeout: PT30S
+    retries: 1
+    auth:
+      enabled: false
+      tokenUrl: '/auth/token'
+      clientId: 'test-client'
+      clientSecret: 'test-secret'
+    services:
+      auth:
+        port: 8081
+        timeout: PT10S
+        retries: 0
+        enabled: true
+      station:
+        port: 8083
+        timeout: PT10S
+        retries: 0
+        enabled: true
+
+logging:
+  level:
+    com.gasolinerajsm.sdk: DEBUG
+    org.springframework.web.reactive.function.client: DEBUG

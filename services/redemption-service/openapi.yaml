@@ -1,0 +1,23 @@
+openapi: 3.0.3
+info:
+  title: Redemption API
+  version: v1
+  description: API for Redemption service
+servers:
+  - url: http://localhost:8082
+    description: Local development server
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "UP"

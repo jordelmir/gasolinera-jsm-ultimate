@@ -1,0 +1,223 @@
+services:
+  # Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: gasolinera-postgres-dev
+    environment:
+      POSTGRES_DB: gasolinera_dev
+      POSTGRES_USER: gasolinera_dev
+      POSTGRES_PASSWORD: dev_password
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./ops/scripts/dev/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - gasolinera-dev
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: gasolinera-redis-dev
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - gasolinera-dev
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/auth-service/Dockerfile
+    container_name: gasolinera-auth-service-dev
+    environment:
+      SPRING_PROFILES_ACTIVE: development
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auth_service_dev
+      SPRING_DATASOURCE_USERNAME: gasolinera_dev
+      SPRING_DATASOURCE_PASSWORD: dev_password
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    ports:
+      - '8081:8081'
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - gasolinera-dev
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8081/actuator/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Coupon Service
+  coupon-service:
+    build:
+      context: .
+      dockerfile: services/coupon-service/Dockerfile
+    container_name: gasolinera-coupon-service-dev
+    environment:
+      SPRING_PROFILES_ACTIVE: development
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/coupon_service_dev
+      SPRING_DATASOURCE_USERNAME: gasolinera_dev
+      SPRING_DATASOURCE_PASSWORD: dev_password
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    ports:
+      - '8086:8086'
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - gasolinera-dev
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8086/actuator/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Station Service
+  station-service:
+    build:
+      context: .
+      dockerfile: services/station-service/Dockerfile
+    container_name: gasolinera-station-service-dev
+    environment:
+      SPRING_PROFILES_ACTIVE: development
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/station_service_dev
+      SPRING_DATASOURCE_USERNAME: gasolinera_dev
+      SPRING_DATASOURCE_PASSWORD: dev_password
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    ports:
+      - '8083:8083'
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - gasolinera-dev
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8083/actuator/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redemption Service
+  redemption-service:
+    build:
+      context: .
+      dockerfile: services/redemption-service/Dockerfile
+    container_name: gasolinera-redemption-service-dev
+    environment:
+      SPRING_PROFILES_ACTIVE: development
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/redemption_service_dev
+      SPRING_DATASOURCE_USERNAME: gasolinera_dev
+      SPRING_DATASOURCE_PASSWORD: dev_password
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    ports:
+      - '8082:8082'
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - gasolinera-dev
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8082/actuator/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Ad Engine Service
+  ad-engine:
+    build:
+      context: .
+      dockerfile: services/ad-engine/Dockerfile
+    container_name: gasolinera-ad-engine-dev
+    environment:
+      SPRING_PROFILES_ACTIVE: development
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ad_engine_dev
+      SPRING_DATASOURCE_USERNAME: gasolinera_dev
+      SPRING_DATASOURCE_PASSWORD: dev_password
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    ports:
+      - '8084:8084'
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - gasolinera-dev
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8084/actuator/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Raffle Service
+  raffle-service:
+    build:
+      context: .
+      dockerfile: services/raffle-service/Dockerfile
+    container_name: gasolinera-raffle-service-dev
+    environment:
+      SPRING_PROFILES_ACTIVE: development
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/raffle_service_dev
+      SPRING_DATASOURCE_USERNAME: gasolinera_dev
+      SPRING_DATASOURCE_PASSWORD: dev_password
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    ports:
+      - '8085:8085'
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - gasolinera-dev
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8085/actuator/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
+    container_name: gasolinera-api-gateway-dev
+    environment:
+      SPRING_PROFILES_ACTIVE: development
+      # Gateway doesn't need database, but needs service URLs
+      AUTH_SERVICE_URL: http://auth-service:8081
+      COUPON_SERVICE_URL: http://coupon-service:8086
+      STATION_SERVICE_URL: http://station-service:8083
+      REDEMPTION_SERVICE_URL: http://redemption-service:8082
+      AD_ENGINE_URL: http://ad-engine:8084
+      RAFFLE_SERVICE_URL: http://raffle-service:8085
+    ports:
+      - '8080:8080'
+    depends_on:
+      - auth-service
+      - coupon-service
+      - station-service
+      - redemption-service
+      - ad-engine
+      - raffle-service
+    networks:
+      - gasolinera-dev
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/actuator/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_dev_data:
+  redis_dev_data:
+
+networks:
+  gasolinera-dev:
+    driver: bridge

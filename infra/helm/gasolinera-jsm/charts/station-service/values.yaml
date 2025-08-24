@@ -1,0 +1,13 @@
+image:
+  repository: <YOUR_ECR_REPO_URL>/station-service
+  tag: "latest"
+
+service:
+  port: 8080
+
+env:
+  - name: POSTGRES_HOST
+    valueFrom:
+      secretKeyRef:
+        name: puntog-secrets
+        key: POSTGRES_HOST

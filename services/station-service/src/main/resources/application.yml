@@ -1,0 +1,30 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: station-service
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:puntog}
+    username: ${POSTGRES_USER:puntog}
+    password: ${POSTGRES_PASSWORD:changeme}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+  cloud:
+    vault:
+      enabled: true
+      scheme: http
+      host: localhost
+      port: 8200
+      authentication: TOKEN
+      token: ${VAULT_TOKEN:myroottoken}
+      kv:
+        enabled: true
+        backend: secret
+        profile-separator: /
+        default-context: application
+        application-name: ${spring.application.name}

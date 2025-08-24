@@ -1,0 +1,30 @@
+{
+  "shellEnvironmentResolutionTimeout": 30,
+  "defaultShell": {
+    "osx": "/bin/zsh",
+    "linux": "/bin/bash",
+    "windows": "powershell.exe"
+  },
+  "environmentVariables": {
+    "NODE_ENV": "development",
+    "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk",
+    "GRADLE_OPTS": "-Xmx2g -Dfile.encoding=UTF-8",
+    "NX_DAEMON": "true",
+    "DOCKER_BUILDKIT": "1",
+    "COMPOSE_DOCKER_CLI_BUILD": "1"
+  },
+  "pathExtensions": [
+    "./node_modules/.bin",
+    "./gradlew",
+    "/usr/local/bin",
+    "$HOME/.local/bin"
+  ],
+  "shellInitCommands": [
+    "export PATH=\"./node_modules/.bin:$PATH\"",
+    "export JAVA_HOME=\"/usr/lib/jvm/java-17-openjdk\"",
+    "alias nx='npx nx'",
+    "alias gradle='./gradlew'",
+    "alias dc='docker-compose'",
+    "alias dcd='docker-compose -f docker-compose.dev.yml'"
+  ]
+}

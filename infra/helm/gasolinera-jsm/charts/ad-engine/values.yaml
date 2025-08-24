@@ -1,0 +1,23 @@
+image:
+  repository: <YOUR_ECR_REPO_URL>/ad-engine
+  tag: "latest"
+
+service:
+  port: 8080
+
+env:
+  - name: JWT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: puntog-secrets
+        key: JWT_SECRET
+  - name: POSTGRES_HOST
+    valueFrom:
+      secretKeyRef:
+        name: puntog-secrets
+        key: POSTGRES_HOST
+  - name: FALLBACK_AD_URL
+    valueFrom:
+      secretKeyRef:
+        name: puntog-secrets
+        key: FALLBACK_AD_URL

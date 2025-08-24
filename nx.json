@@ -1,0 +1,67 @@
+{
+  "targetDefaults": {
+    "build": {
+      "cache": true,
+      "outputs": [
+        "{projectRoot}/dist",
+        "{projectRoot}/build"
+      ],
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "lint": {
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.eslintrc.json",
+        "{workspaceRoot}/.eslintignore"
+      ]
+    },
+    "test": {
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        "{workspaceRoot}/jest.preset.js"
+      ]
+    },
+    "serve": {
+      "cache": false
+    }
+  },
+  "affected": {
+    "defaultBase": "main"
+  },
+  "namedInputs": {
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals"
+    ],
+    "production": [
+      "default",
+      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/jest.config.[jt]s",
+      "!{projectRoot}/src/test-setup.[jt]s",
+      "!{projectRoot}/test-setup.[jt]s"
+    ],
+    "sharedGlobals": []
+  },
+  "generators": {
+    "@nx/next": {
+      "application": {
+        "style": "tailwind",
+        "linter": "eslint"
+      }
+    },
+    "@nx/react": {
+      "application": {
+        "style": "tailwind",
+        "linter": "eslint",
+        "bundler": "vite"
+      }
+    }
+  },
+  "$schema": "./node_modules/nx/schemas/nx-schema.json"
+}

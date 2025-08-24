@@ -1,0 +1,92 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - 'alert_rules.yml'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+scrape_configs:
+  # API Gateway
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['api-gateway:8080']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+
+  # Auth Service
+  - job_name: 'auth-service'
+    static_configs:
+      - targets: ['auth-service:8080']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+
+  # Coupon Service
+  - job_name: 'coupon-service'
+    static_configs:
+      - targets: ['coupon-service:8080']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+
+  # Station Service
+  - job_name: 'station-service'
+    static_configs:
+      - targets: ['station-service:8080']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+
+  # Ad Engine
+  - job_name: 'ad-engine'
+    static_configs:
+      - targets: ['ad-engine:8080']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+
+  # Raffle Service
+  - job_name: 'raffle-service'
+    static_configs:
+      - targets: ['raffle-service:8080']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+
+  # Redemption Service
+  - job_name: 'redemption-service'
+    static_configs:
+      - targets: ['redemption-service:8080']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+
+  # PostgreSQL
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 30s
+
+  # Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    scrape_interval: 30s
+
+  # RabbitMQ
+  - job_name: 'rabbitmq'
+    static_configs:
+      - targets: ['rabbitmq:15692']
+    scrape_interval: 30s
+
+  # Node Exporter (System metrics)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 30s
+
+  # Nginx
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+    scrape_interval: 30s

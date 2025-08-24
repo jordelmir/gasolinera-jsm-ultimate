@@ -1,0 +1,56 @@
+{
+  "workspace": {
+    "name": "gasolinera-jsm-ultimate",
+    "type": "monorepo",
+    "technologies": [
+      "nx",
+      "gradle",
+      "kotlin",
+      "nextjs",
+      "typescript",
+      "docker"
+    ],
+    "shellEnvironment": {
+      "resolutionTimeout": 30,
+      "autoDetectShell": true,
+      "inheritSystemEnvironment": true
+    }
+  },
+  "development": {
+    "defaultCommands": {
+      "start": "make dev",
+      "build": "./gradlew build && npm run build",
+      "test": "make test",
+      "lint": "npm run lint",
+      "format": "npm run format"
+    },
+    "ports": {
+      "apiGateway": 8080,
+      "authService": 8081,
+      "redemptionService": 8082,
+      "stationService": 8083,
+      "adEngine": 8084,
+      "raffleService": 8085,
+      "couponService": 8086,
+      "adminDashboard": 3000,
+      "advertiserPortal": 3001,
+      "ownerDashboard": 3002,
+      "postgresql": 5432,
+      "redis": 6379,
+      "rabbitmq": 5672,
+      "jaeger": 16686
+    }
+  },
+  "tools": {
+    "packageManagers": {
+      "frontend": "npm",
+      "backend": "gradle",
+      "containers": "docker-compose"
+    },
+    "buildTools": {
+      "frontend": "nx",
+      "backend": "gradle",
+      "containerization": "docker"
+    }
+  }
+}

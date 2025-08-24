@@ -1,0 +1,46 @@
+gasolinera:
+  api:
+    baseUrl: 'https://api.gasolinerajsm.com'
+    timeout: PT30S # 30 seconds for production
+    retries: 3
+    auth:
+      enabled: true
+      tokenUrl: '/auth/token'
+      clientId: '${GASOLINERA_CLIENT_ID:}'
+      clientSecret: '${GASOLINERA_CLIENT_SECRET:}'
+    services:
+      auth:
+        baseUrl: 'https://api.gasolinerajsm.com/auth'
+        timeout: PT30S
+        retries: 3
+        enabled: true
+      station:
+        baseUrl: 'https://api.gasolinerajsm.com/station'
+        timeout: PT30S
+        retries: 3
+        enabled: true
+      coupon:
+        baseUrl: 'https://api.gasolinerajsm.com/coupon'
+        timeout: PT30S
+        retries: 3
+        enabled: true
+      redemption:
+        baseUrl: 'https://api.gasolinerajsm.com/redemption'
+        timeout: PT30S
+        retries: 3
+        enabled: true
+      adengine:
+        baseUrl: 'https://api.gasolinerajsm.com/adengine'
+        timeout: PT30S
+        retries: 3
+        enabled: true
+      raffle:
+        baseUrl: 'https://api.gasolinerajsm.com/raffle'
+        timeout: PT30S
+        retries: 3
+        enabled: true
+
+logging:
+  level:
+    com.gasolinerajsm.sdk: INFO
+    org.springframework.web.reactive.function.client: WARN

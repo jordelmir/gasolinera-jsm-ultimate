@@ -1,0 +1,47 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: auth-service
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:puntog}
+    username: ${POSTGRES_USER:puntog}
+    password: ${POSTGRES_PASSWORD:changeme}
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+  redis:
+    host: ${REDIS_HOST:localhost}
+
+  cloud:
+    vault:
+      enabled: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dev-secret-key-change-in-production}
+    refreshSecret: ${JWT_REFRESH_SECRET:dev-refresh-secret-key-change-in-production}
+    expirationMs: 900000 # 15 minutes
+    refreshExpirationMs: 604800000 # 7 days
+  otp:
+    provider: ${OTP_PROVIDER:mock}
+    length: 6
+    expiration-minutes: 5
+  auth:
+    admin-email: ${ADMIN_EMAIL:admin@puntog.com}
+    admin-password: ${ADMIN_PASSWORD:admin123}
+    advertiser-email: ${ADVERTISER_EMAIL:anunciante@tosty.com}
+    advertiser-password: ${ADVERTISER_PASSWORD:tosty123}
+
+# --- OpenTelemetry Tracing Configuration ---
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://jaeger:4318/v1/traces
