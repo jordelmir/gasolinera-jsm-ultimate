@@ -6,4 +6,8 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface PointsLedgerRepository : JpaRepository<PointsLedgerEntry, UUID>
+interface PointsLedgerRepository : JpaRepository<PointsLedgerEntry, UUID> {
+
+    @org.springframework.data.jpa.repository.Query("SELECT COALESCE(SUM(p.points), 0) FROM PointsLedgerEntry p WHERE p.type = 'CREDIT'")
+    fun sumPointsCredited(): Long
+}

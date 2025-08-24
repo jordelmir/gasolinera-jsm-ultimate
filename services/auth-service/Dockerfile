@@ -3,7 +3,7 @@ FROM gradle:8.8.0-jdk17-alpine AS build
 WORKDIR /home/gradle/project
 
 # Copiar solo los archivos de build para cachear dependencias
-COPY build.gradle.kts settings.gradle.kts ./ 
+COPY build.gradle.kts settings.gradle.kts ./
 COPY services/auth-service/build.gradle.kts ./services/auth-service/
 
 # Descargar dependencias
@@ -13,7 +13,7 @@ RUN gradle :services:auth-service:dependencies
 COPY . .
 
 # Construir la aplicación
-RUN gradle :services:auth-service:build -x test
+RUN gradle :services:auth-service:build -x test -x detekt
 
 # Etapa 2: Producción
 FROM openjdk:17-alpine

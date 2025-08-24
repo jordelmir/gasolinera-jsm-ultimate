@@ -1,0 +1,102 @@
+{
+  "terminal": {
+    "shellEnvironmentResolutionTimeout": 30,
+    "defaultProfile": "development",
+    "profiles": {
+      "development": {
+        "shell": "/bin/zsh",
+        "workingDirectory": "${workspaceFolder}",
+        "environmentVariables": {
+          "NODE_ENV": "development",
+          "JAVA_HOME": "/Library/Java/JavaVirtualMachines/openjdk-17.jdk/Contents/Home",
+          "GRADLE_OPTS": "-Xmx4g -Dfile.encoding=UTF-8 -Dkotlin.daemon.jvm.options=-Xmx2g",
+          "NX_DAEMON": "true",
+          "DOCKER_BUILDKIT": "1",
+          "COMPOSE_DOCKER_CLI_BUILD": "1",
+          "SPRING_PROFILES_ACTIVE": "dev"
+        },
+        "initCommands": [
+          "echo '🚀 Gasolinera JSM Development Environment'",
+          "echo 'Available commands:'",
+          "echo '  make dev     - Start full development environment'",
+          "echo '  make test    - Run all tests'",
+          "echo '  nx serve     - Start specific frontend app'",
+          "echo '  ./gradlew    - Gradle commands'",
+          "echo ''",
+          "export PATH=\"./node_modules/.bin:$PATH\"",
+          "alias nx='npx nx'",
+          "alias gradle='./gradlew'",
+          "alias dc='docker-compose'",
+          "alias dcd='docker-compose -f docker-compose.dev.yml'",
+          "alias dcl='docker-compose logs -f'",
+          "alias dcs='docker-compose ps'"
+        ]
+      },
+      "backend": {
+        "shell": "/bin/zsh",
+        "workingDirectory": "${workspaceFolder}",
+        "environmentVariables": {
+          "JAVA_HOME": "/Library/Java/JavaVirtualMachines/openjdk-17.jdk/Contents/Home",
+          "GRADLE_OPTS": "-Xmx4g -Dfile.encoding=UTF-8",
+          "SPRING_PROFILES_ACTIVE": "dev"
+        },
+        "initCommands": [
+          "echo '☕ Backend Development (Kotlin/Spring Boot)'",
+          "cd services",
+          "alias gradle='../gradlew'",
+          "alias build='../gradlew build'",
+          "alias test='../gradlew test'",
+          "alias run='../gradlew bootRun'"
+        ]
+      },
+      "frontend": {
+        "shell": "/bin/zsh",
+        "workingDirectory": "${workspaceFolder}",
+        "environmentVariables": {
+          "NODE_ENV": "development",
+          "NX_DAEMON": "true"
+        },
+        "initCommands": [
+          "echo '⚛️ Frontend Development (Next.js/React)'",
+          "export PATH=\"./node_modules/.bin:$PATH\"",
+          "alias nx='npx nx'",
+          "alias dev-admin='nx serve admin'",
+          "alias dev-advertiser='nx serve advertiser'",
+          "alias dev-owner='nx serve owner-dashboard'",
+          "alias build-all='nx run-many --target=build --all'",
+          "alias test-all='nx run-many --target=test --all'"
+        ]
+      },
+      "docker": {
+        "shell": "/bin/zsh",
+        "workingDirectory": "${workspaceFolder}",
+        "environmentVariables": {
+          "DOCKER_BUILDKIT": "1",
+          "COMPOSE_DOCKER_CLI_BUILD": "1"
+        },
+        "initCommands": [
+          "echo '🐳 Docker Development Environment'",
+          "alias dc='docker-compose'",
+          "alias dcd='docker-compose -f docker-compose.dev.yml'",
+          "alias dcup='docker-compose up -d'",
+          "alias dcdown='docker-compose down'",
+          "alias dcl='docker-compose logs -f'",
+          "alias dcs='docker-compose ps'",
+          "alias dcr='docker-compose restart'",
+          "alias dcb='docker-compose build'"
+        ]
+      }
+    }
+  },
+  "quickCommands": {
+    "Start Development": "make dev",
+    "Stop All Services": "make stop",
+    "View Logs": "make logs",
+    "Run Tests": "make test",
+    "Clean Environment": "make clean",
+    "Seed Database": "make seed",
+    "Build All": "./gradlew build && npm run build",
+    "Lint All": "npm run lint",
+    "Format Code": "npm run format"
+  }
+}

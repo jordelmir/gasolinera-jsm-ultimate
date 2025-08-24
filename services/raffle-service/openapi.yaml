@@ -1,0 +1,23 @@
+openapi: 3.0.3
+info:
+  title: Raffle API
+  version: v1
+  description: API for Raffle service
+servers:
+  - url: http://localhost:8085
+    description: Local development server
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "UP"

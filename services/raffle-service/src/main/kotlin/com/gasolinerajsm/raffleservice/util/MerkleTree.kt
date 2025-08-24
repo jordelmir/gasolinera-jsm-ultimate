@@ -1,8 +1,6 @@
-
 package com.gasolinerajsm.raffleservice.util
 
-import com.google.common.hash.Hashing
-import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 
 // Placeholder for a Merkle Tree implementation
 class MerkleTree(val root: String) {
@@ -25,7 +23,9 @@ class MerkleTree(val root: String) {
         }
 
         private fun hash(input: String): String {
-            return Hashing.sha256().hashString(input, StandardCharsets.UTF_8).toString()
+            val digest = MessageDigest.getInstance("SHA-256")
+            val hashBytes = digest.digest(input.toByteArray())
+            return hashBytes.joinToString("") { "%02x".format(it) }
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.gasolinerajsm.redemptionservice.adapter.in.web
+package com.gasolinerajsm.redemptionservice.adapter.`in`.web
 
 import com.gasolinerajsm.redemptionservice.application.RedemptionService
 import com.gasolinerajsm.redemptionservice.service.QrSecurityService
@@ -25,15 +25,13 @@ class RedemptionController(
     fun redeem(@Valid @RequestBody command: RedeemCommand): RedemptionResult {
         val qrPayload = qrSecurityService.validateAndParseToken(command.qrToken)
         // In a real app, get userId from JWT token (SecurityContextHolder)
-        val userId = "user-placeholder-id" 
-        return redemptionService.initiateRedemption(userId, command)
+        return redemptionService.initiateRedemption(command)
     }
 
     @PostMapping("/confirm-ad")
     fun confirmAd(@Valid @RequestBody request: ConfirmAdRequest): ConfirmAdResponse {
         // In a real app, get userId from JWT token
-        val userId = "user-placeholder-id"
-        return redemptionService.confirmAdWatched(userId, request)
+        return redemptionService.confirmAdWatched(request)
     }
 
     @GetMapping("/points-redeemed/count")

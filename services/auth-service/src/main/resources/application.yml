@@ -10,7 +10,8 @@ spring:
     password: ${POSTGRES_PASSWORD:changeme}
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
   redis:
@@ -18,23 +19,12 @@ spring:
 
   cloud:
     vault:
-      enabled: true
-      scheme: http
-      host: localhost
-      port: 8200
-      authentication: TOKEN
-      token: ${VAULT_TOKEN:myroottoken} # For local development
-      kv:
-        enabled: true
-        backend: secret # Or your backend name
-        profile-separator: /
-        default-context: application
-        application-name: ${spring.application.name}
+      enabled: false
 
 app:
   jwt:
-    secret: ${JWT_SECRET}
-    refreshSecret: ${JWT_REFRESH_SECRET}
+    secret: ${JWT_SECRET:dev-secret-key-change-in-production}
+    refreshSecret: ${JWT_REFRESH_SECRET:dev-refresh-secret-key-change-in-production}
     expirationMs: 900000 # 15 minutes
     refreshExpirationMs: 604800000 # 7 days
   otp:
@@ -48,5 +38,10 @@ app:
     advertiser-password: ${ADVERTISER_PASSWORD:tosty123}
 
 # --- OpenTelemetry Tracing Configuration ---
-management.tracing.sampling.probability=1.0
-management.otlp.tracing.endpoint=http://jaeger:4318/v1/traces
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://jaeger:4318/v1/traces

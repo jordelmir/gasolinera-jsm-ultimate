@@ -14,5 +14,10 @@ data class AdCampaign(
     val stationId: Long?,
     val startDate: Instant,
     val endDate: Instant,
-    val isActive: Boolean
+    val isActive: Boolean,
+    val status: String = "ACTIVE",
+    val budgetTotal: Double = 0.0,
+    val budgetSpent: Double = 0.0,
+    @ElementCollection
+    val targetStations: Set<String> = emptySet()
 )

@@ -1,0 +1,187 @@
+spring:
+  application:
+    name: api-gateway
+
+  # Redis configuration (corrected deprecated properties)
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+  # Spring Cloud Gateway Configuration
+  cloud:
+    gateway:
+      # Global CORS configuration
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins:
+              - 'http://localhost:3000'
+              - 'http://localhost:3001'
+              - 'http://localhost:3002'
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowed-headers: '*'
+            allow-credentials: true
+            max-age: 3600
+
+      # Route definitions
+      routes:
+        # Auth Service Routes
+        - id: auth-service
+          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                rate-limiter: '#{@redisRateLimiter}'
+                key-resolver: '#{@userKeyResolver}'
+                redis-rate-limiter.requests-per-second: 10
+                redis-rate-limiter.burst-capacity: 20
+
+        # Station Service Routes
+        - id: station-service
+          uri: ${STATION_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/stations/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - name: CircuitBreaker
+              args:
+                name: station-service-cb
+                fallbackUri: forward:/fallback/stations
+
+        # Coupon Service Routes
+        - id: coupon-service
+          uri: ${COUPON_SERVICE_URL:http://localhost:8086}
+          predicates:
+            - Path=/api/coupons/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - name: RequestRateLimiter
+              args:
+                rate-limiter: '#{@redisRateLimiter}'
+                key-resolver: '#{@userKeyResolver}'
+                redis-rate-limiter.requests-per-second: 20
+                redis-rate-limiter.burst-capacity: 40
+
+        # Redemption Service Routes
+        - id: redemption-service
+          uri: ${REDEMPTION_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/redemptions/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - name: CircuitBreaker
+              args:
+                name: redemption-service-cb
+                fallbackUri: forward:/fallback/redemptions
+
+        # Ad Engine Routes
+        - id: ad-engine
+          uri: ${AD_ENGINE_URL:http://localhost:8084}
+          predicates:
+            - Path=/api/ads/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - name: CircuitBreaker
+              args:
+                name: ad-engine-cb
+                fallbackUri: forward:/fallback/ads
+
+        # Raffle Service Routes
+        - id: raffle-service
+          uri: ${RAFFLE_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/api/raffles/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - name: CircuitBreaker
+              args:
+                name: raffle-service-cb
+                fallbackUri: forward:/fallback/raffles
+
+      # Default filters applied to all routes
+      default-filters:
+        - name: RequestLogging
+        - name: ResponseLogging
+        - name: AddRequestHeader
+          args:
+            name: X-Gateway-Request-Id
+            value: '#{T(java.util.UUID).randomUUID().toString()}'
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:gasolinera-jsm-super-secret-key-for-development-only}
+  expiration: ${JWT_EXPIRATION:86400000} # 24 hours
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 days
+
+# Rate Limiting Configuration
+rate-limiting:
+  default:
+    requests-per-second: ${RATE_LIMIT_REQUESTS_PER_SECOND:100}
+    burst-capacity: ${RATE_LIMIT_BURST_CAPACITY:200}
+
+# Circuit Breaker Configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      station-service-cb:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+      redemption-service-cb:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+      ad-engine-cb:
+        failure-rate-threshold: 60
+        wait-duration-in-open-state: 20s
+        sliding-window-size: 8
+        minimum-number-of-calls: 3
+      raffle-service-cb:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+
+# Management and Monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,gateway
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Logging Configuration
+logging:
+  level:
+    '[com.gasolinerajsm]': DEBUG
+    '[org.springframework.security]': DEBUG
+    '[org.springframework.cloud.gateway]': DEBUG
+    '[org.springframework.web.reactive]': DEBUG
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'

@@ -1,0 +1,46 @@
+gasolinera:
+  api:
+    baseUrl: 'https://staging-api.gasolinerajsm.com'
+    timeout: PT45S # 45 seconds for staging
+    retries: 2
+    auth:
+      enabled: true
+      tokenUrl: '/auth/token'
+      clientId: '${GASOLINERA_STAGING_CLIENT_ID:staging-client}'
+      clientSecret: '${GASOLINERA_STAGING_CLIENT_SECRET:staging-secret}'
+    services:
+      auth:
+        baseUrl: 'https://staging-api.gasolinerajsm.com/auth'
+        timeout: PT45S
+        retries: 2
+        enabled: true
+      station:
+        baseUrl: 'https://staging-api.gasolinerajsm.com/station'
+        timeout: PT45S
+        retries: 2
+        enabled: true
+      coupon:
+        baseUrl: 'https://staging-api.gasolinerajsm.com/coupon'
+        timeout: PT45S
+        retries: 2
+        enabled: true
+      redemption:
+        baseUrl: 'https://staging-api.gasolinerajsm.com/redemption'
+        timeout: PT45S
+        retries: 2
+        enabled: true
+      adengine:
+        baseUrl: 'https://staging-api.gasolinerajsm.com/adengine'
+        timeout: PT45S
+        retries: 2
+        enabled: true
+      raffle:
+        baseUrl: 'https://staging-api.gasolinerajsm.com/raffle'
+        timeout: PT45S
+        retries: 2
+        enabled: true
+
+logging:
+  level:
+    com.gasolinerajsm.sdk: DEBUG
+    org.springframework.web.reactive.function.client: INFO

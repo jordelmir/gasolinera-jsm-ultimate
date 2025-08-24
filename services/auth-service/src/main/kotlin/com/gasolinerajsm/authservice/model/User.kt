@@ -1,8 +1,8 @@
 package com.gasolinerajsm.authservice.model
 
 import jakarta.persistence.*
-import java.time.Instant
-import java.util.UUID
+import java.time.LocalDateTime
+import java.util.*
 
 @Entity
 @Table(name = "users")
@@ -14,14 +14,19 @@ data class User(
     @Column(name = "phone_number", unique = true, nullable = false)
     val phoneNumber: String,
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    val roles: Set<Role> = setOf(Role.USER),
+
     @Column(name = "created_at", nullable = false)
-    val createdAt: Instant = Instant.now(),
+    val createdAt: LocalDateTime = LocalDateTime.now(),
 
     @Column(name = "updated_at", nullable = false)
-    var updatedAt: Instant = Instant.now()
+    val updatedAt: LocalDateTime = LocalDateTime.now()
 ) {
-    @PreUpdate
-    fun preUpdate() {
-        updatedAt = Instant.now()
-    }
+    constructor() : this(phoneNumber = "")
+}
+
+enum class Role {
+    USER, ADMIN, ADVERTISER
 }

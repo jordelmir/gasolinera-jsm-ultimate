@@ -1,6 +1,6 @@
 package com.gasolinerajsm.redemptionservice.domain.aggregate
 
-import com.gasolinerajsm.redemptionservice.service.QrSecurityService.QrPayload
+import com.gasolinerajsm.redemptionservice.service.QrPayload
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table

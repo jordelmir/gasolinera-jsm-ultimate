@@ -1,127 +1,300 @@
 package com.gasolinerajsm.raffleservice.service
 
+import com.gasolinerajsm.raffleservice.dto.CreateRaffleRequest
+import com.gasolinerajsm.raffleservice.dto.RaffleDto
+import com.gasolinerajsm.raffleservice.dto.RaffleParticipantDto
+import com.gasolinerajsm.raffleservice.dto.RaffleWinnerDto
+import com.gasolinerajsm.raffleservice.exception.RaffleNotFoundException
+import com.gasolinerajsm.raffleservice.exception.RaffleOperationException
+import com.gasolinerajsm.raffleservice.mapper.toDto
+import com.gasolinerajsm.raffleservice.mapper.toEntity
 import com.gasolinerajsm.raffleservice.model.Raffle
-import com.gasolinerajsm.raffleservice.model.RaffleEntry
+import com.gasolinerajsm.raffleservice.model.RaffleParticipant
 import com.gasolinerajsm.raffleservice.model.RaffleStatus
 import com.gasolinerajsm.raffleservice.model.RaffleWinner
-import com.gasolinerajsm.raffleservice.repository.RaffleEntryRepository
+import com.gasolinerajsm.raffleservice.repository.RaffleParticipantRepository
 import com.gasolinerajsm.raffleservice.repository.RaffleRepository
 import com.gasolinerajsm.raffleservice.repository.RaffleWinnerRepository
 import com.gasolinerajsm.raffleservice.util.MerkleTreeGenerator
+import com.gasolinerajsm.raffleservice.util.TransparencyReport
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Mono
-import java.math.BigInteger
 import java.time.LocalDateTime
+import java.util.*
 
+/**
+ * Service class for Raffle operations following hexagonal architecture principles
+ */
 @Service
+@Transactional
 class RaffleService(
     private val raffleRepository: RaffleRepository,
-    private val raffleEntryRepository: RaffleEntryRepository,
-    private val raffleWinnerRepository: RaffleWinnerRepository,
-    private val webClientBuilder: WebClient.Builder
+    private val participantRepository: RaffleParticipantRepository,
+    private val winnerRepository: RaffleWinnerRepository,
+    private val externalSeedService: ExternalSeedService
 ) {
 
     private val logger = LoggerFactory.getLogger(RaffleService::class.java)
 
-    @Transactional
-    fun closeRafflePeriod(period: String): Raffle {
-        logger.info("Attempting to close raffle period: {}", period)
+    /**
+     * Create a new raffle
+     */
+    fun createRaffle(request: CreateRaffleRequest): RaffleDto {
+        logger.info("Creating new raffle: {}", request.name)
 
-        val existingRaffle = raffleRepository.findByPeriod(period)
-        if (existingRaffle != null && existingRaffle.status != RaffleStatus.OPEN) {
-            throw IllegalStateException("Raffle for period $period is already closed or drawn.")
+        // Check if raffle with same name already exists and is active
+        if (raffleRepository.existsByNameAndStatus(request.name, RaffleStatus.OPEN)) {
+            throw RaffleOperationException("Active raffle with name '${request.name}' already exists")
         }
 
-        // TODO: Fetch actual point IDs from redemption-service for the given period
-        // For now, simulate fetching point IDs
-        val pointIds = (1..100).map { "point_id_${it}_$period" }
-        if (pointIds.isEmpty()) {
-            throw IllegalStateException("No points found for period $period. Cannot close raffle.")
-        }
-        logger.info("Fetched {} point IDs for period {}", pointIds.size, period)
-
-        val merkleRoot = MerkleTreeGenerator.generateMerkleRoot(pointIds)
-        logger.info("Generated Merkle Root for period {}: {}", period, merkleRoot)
-
-        val raffle = existingRaffle ?: Raffle(period = period, merkleRoot = merkleRoot)
-        raffle.merkleRoot = merkleRoot // Update if already exists
-        raffle.status = RaffleStatus.CLOSED
+        val raffle = request.toEntity()
         val savedRaffle = raffleRepository.save(raffle)
-        logger.info("Raffle for period {} closed with ID: {}", period, savedRaffle.id)
 
-        // Save raffle entries
-        pointIds.forEach { pointId ->
-            raffleEntryRepository.save(RaffleEntry(raffleId = savedRaffle.id!!, pointId = pointId))
-        }
-        logger.info("Saved {} raffle entries for raffle ID: {}", pointIds.size, savedRaffle.id)
-
-        return savedRaffle
+        logger.info("Raffle created successfully with id: {}", savedRaffle.id)
+        return savedRaffle.toDto()
     }
 
-    @Transactional
-    fun executeRaffleDraw(raffleId: Long): RaffleWinner {
-        logger.info("Attempting to execute draw for raffle ID: {}", raffleId)
-        val raffle = raffleRepository.findById(raffleId)
-            .orElseThrow { IllegalArgumentException("Raffle with ID $raffleId not found.") }
+    /**
+     * Get raffle by ID
+     */
+    @Transactional(readOnly = true)
+    fun getRaffleById(raffleId: String): RaffleDto {
+        logger.debug("Finding raffle with id: {}", raffleId)
 
-        if (raffle.status != RaffleStatus.CLOSED) {
-            throw IllegalStateException("Raffle with ID $raffleId is not in CLOSED status. Current status: ${raffle.status}")
+        val raffle = raffleRepository.findById(raffleId).orElseThrow {
+            RaffleNotFoundException("Raffle not found with id: $raffleId")
         }
 
-        val externalSeed = getBitcoinBlockhash().block() // Blocking call for simplicity in demo
-        if (externalSeed == null) {
-            throw IllegalStateException("Could not retrieve external seed for draw.")
+        return raffle.toDto()
+    }
+
+    /**
+     * Get all raffles
+     */
+    @Transactional(readOnly = true)
+    fun getAllRaffles(): List<RaffleDto> {
+        logger.debug("Finding all raffles")
+        return raffleRepository.findAll().map { it.toDto() }
+    }
+
+    /**
+     * Get active raffles
+     */
+    @Transactional(readOnly = true)
+    fun getActiveRaffles(): List<RaffleDto> {
+        logger.debug("Finding active raffles")
+        return raffleRepository.findActiveRaffles().map { it.toDto() }
+    }
+
+    /**
+     * Get raffles by status
+     */
+    @Transactional(readOnly = true)
+    fun getRafflesByStatus(status: RaffleStatus): List<RaffleDto> {
+        logger.debug("Finding raffles with status: {}", status)
+        return raffleRepository.findByStatus(status).map { it.toDto() }
+    }
+
+    /**
+     * Add participant to raffle
+     */
+    fun addParticipant(raffleId: String, userId: String, eligibilityProof: String): RaffleParticipantDto {
+        logger.info("Adding participant {} to raffle {}", userId, raffleId)
+
+        val raffle = raffleRepository.findById(raffleId).orElseThrow {
+            RaffleNotFoundException("Raffle not found with id: $raffleId")
         }
-        logger.info("Retrieved external seed for raffle ID {}: {}", raffleId, externalSeed)
 
-        val entries = raffleEntryRepository.findByRaffleId(raffleId)
-        if (entries.isEmpty()) {
-            throw IllegalStateException("No entries found for raffle ID $raffleId. Cannot draw winner.")
+        // Check if raffle is active
+        if (!raffle.isActive()) {
+            throw RaffleOperationException("Raffle is not active for participation")
         }
 
-        val winnerIndex = selectWinnerDeterministically(raffle.merkleRoot, externalSeed, entries.size)
-        val winningEntry = entries[winnerIndex]
-        logger.info("Selected winning entry for raffle ID {}: Index {}, Point ID {}", raffleId, winnerIndex, winningEntry.pointId)
+        // Check if user already participated
+        if (participantRepository.existsByRaffleIdAndUserId(raffleId, userId)) {
+            throw RaffleOperationException("User already participated in this raffle")
+        }
 
-        val winner = RaffleWinner(
-            raffleId = raffle.id!!,
-            userId = "mock-user-id-from-point", // TODO: Extract user ID from pointId or fetch from redemption-service
-            winningPointId = winningEntry.pointId,
-            prize = "10000 Puntos G" // Example prize
+        // Check participant limit
+        val currentParticipants = participantRepository.countByRaffleId(raffleId)
+        if (currentParticipants >= raffle.maxParticipants) {
+            throw RaffleOperationException("Raffle has reached maximum participants limit")
+        }
+
+        val participant = RaffleParticipant(
+            id = UUID.randomUUID().toString(),
+            raffleId = raffleId,
+            userId = userId,
+            eligibilityProof = eligibilityProof,
+            entryHash = MerkleTreeGenerator.sha256("$userId:$raffleId:${LocalDateTime.now()}:$eligibilityProof")
         )
-        val savedWinner = raffleWinnerRepository.save(winner)
 
-        raffle.status = RaffleStatus.DRAWN
-        raffle.drawAt = LocalDateTime.now()
-        raffle.externalSeed = externalSeed
-        raffle.winnerEntryId = winningEntry.pointId
-        raffleRepository.save(raffle)
-        logger.info("Raffle ID {} drawn. Winner: {}", raffleId, savedWinner.winningPointId)
+        val savedParticipant = participantRepository.save(participant)
+        logger.info("Participant added successfully: {}", savedParticipant.id)
 
-        return savedWinner
+        return savedParticipant.toDto()
     }
 
-    private fun getBitcoinBlockhash(): Mono<String> {
-        // Using a public API for Bitcoin block hash
-        val webClient = webClientBuilder.baseUrl("https://blockchain.info").build()
-        return webClient.get()
-            .uri("/q/latesthash")
-            .retrieve()
-            .bodyToMono(String::class.java)
-            .doOnError { e -> logger.error("Error fetching Bitcoin block hash: {}", e.message) }
+    /**
+     * Get participants for a raffle
+     */
+    @Transactional(readOnly = true)
+    fun getRaffleParticipants(raffleId: String): List<RaffleParticipantDto> {
+        logger.debug("Finding participants for raffle: {}", raffleId)
+
+        if (!raffleRepository.existsById(raffleId)) {
+            throw RaffleNotFoundException("Raffle not found with id: $raffleId")
+        }
+
+        return participantRepository.findByRaffleId(raffleId).map { it.toDto() }
     }
 
-    private fun selectWinnerDeterministically(merkleRoot: String, seed: String, numberOfEntries: Int): Int {
-        // Combine Merkle Root and external seed
-        val combinedHash = MerkleTreeGenerator.sha256(merkleRoot + seed)
-        
-        // Convert hash to a large integer
-        val bigInt = BigInteger(combinedHash, 16)
+    /**
+     * Execute raffle draw
+     */
+    suspend fun executeRaffleDraw(raffleId: String): RaffleWinnerDto {
+        logger.info("Executing raffle draw for raffle: {}", raffleId)
 
-        // Use modulo to get a deterministic index
-        return bigInt.mod(BigInteger.valueOf(numberOfEntries.toLong())).toInt()
+        return withContext(Dispatchers.IO) {
+            val raffle = raffleRepository.findById(raffleId).orElseThrow {
+                RaffleNotFoundException("Raffle not found with id: $raffleId")
+            }
+
+            // Check if raffle can be drawn
+            if (!raffle.canBeDrwan()) {
+                throw RaffleOperationException("Raffle cannot be drawn yet or is already completed")
+            }
+
+            // Check if winner already exists
+            if (winnerRepository.existsByRaffleId(raffleId)) {
+                throw RaffleOperationException("Raffle already has a winner")
+            }
+
+            // Get all participants
+            val participants = participantRepository.findParticipantsForMerkleTree(raffleId)
+            if (participants.isEmpty()) {
+                throw RaffleOperationException("No participants found for raffle")
+            }
+
+            // Generate entry strings for Merkle tree
+            val entries = participants.map { it.generateEntryString() }
+
+            // Get external seed
+            val externalSeed = externalSeedService.getExternalSeed()
+
+            // Select winner deterministically
+            val winnerIndex = MerkleTreeGenerator.selectWinnerIndex(entries, externalSeed)
+            val winnerParticipant = participants[winnerIndex]
+
+            // Generate Merkle proof
+            val merkleRoot = MerkleTreeGenerator.generateMerkleRoot(entries)
+            val merkleProof = MerkleTreeGenerator.generateMerkleProof(entries, entries[winnerIndex])
+
+            // Create winner record
+            val winner = RaffleWinner(
+                id = UUID.randomUUID().toString(),
+                raffleId = raffleId,
+                participantId = winnerParticipant.id,
+                merkleProof = merkleProof.joinToString(",", "[", "]") { "\"$it\"" },
+                externalSeed = externalSeed,
+                selectionIndex = winnerIndex
+            )
+
+            val savedWinner = winnerRepository.save(winner)
+
+            // Update raffle status
+            raffle.setWinner(winnerParticipant.id, merkleRoot, externalSeed)
+            raffleRepository.save(raffle)
+
+            // Verify winner selection
+            savedWinner.verify()
+            winnerRepository.save(savedWinner)
+
+            logger.info("Raffle draw completed successfully. Winner: {}", savedWinner.id)
+            savedWinner.toDto()
+        }
+    }
+
+    /**
+     * Get raffle winner
+     */
+    @Transactional(readOnly = true)
+    fun getRaffleWinner(raffleId: String): RaffleWinnerDto? {
+        logger.debug("Finding winner for raffle: {}", raffleId)
+
+        if (!raffleRepository.existsById(raffleId)) {
+            throw RaffleNotFoundException("Raffle not found with id: $raffleId")
+        }
+
+        return winnerRepository.findByRaffleId(raffleId)?.toDto()
+    }
+
+    /**
+     * Generate transparency report for a raffle
+     */
+    @Transactional(readOnly = true)
+    fun generateTransparencyReport(raffleId: String): TransparencyReport {
+        logger.debug("Generating transparency report for raffle: {}", raffleId)
+
+        // Validate that raffle exists
+        raffleRepository.findById(raffleId).orElseThrow {
+            RaffleNotFoundException("Raffle not found with id: $raffleId")
+        }
+
+        val winner = winnerRepository.findByRaffleId(raffleId)
+            ?: throw RaffleOperationException("No winner found for raffle")
+
+        val participants = participantRepository.findParticipantsForMerkleTree(raffleId)
+        val entries = participants.map { it.generateEntryString() }
+
+        return MerkleTreeGenerator.generateTransparencyReport(
+            entries = entries,
+            winnerIndex = winner.selectionIndex,
+            externalSeed = winner.externalSeed
+        )
+    }
+
+    /**
+     * Close raffle manually
+     */
+    fun closeRaffle(raffleId: String): RaffleDto {
+        logger.info("Closing raffle: {}", raffleId)
+
+        val raffle = raffleRepository.findById(raffleId).orElseThrow {
+            RaffleNotFoundException("Raffle not found with id: $raffleId")
+        }
+
+        if (raffle.status != RaffleStatus.OPEN) {
+            throw RaffleOperationException("Only open raffles can be closed")
+        }
+
+        raffle.close()
+        val savedRaffle = raffleRepository.save(raffle)
+
+        logger.info("Raffle closed successfully: {}", raffleId)
+        return savedRaffle.toDto()
+    }
+
+    /**
+     * Get raffle statistics
+     */
+    @Transactional(readOnly = true)
+    fun getRaffleStatistics(): Map<String, Long> {
+        logger.debug("Getting raffle statistics")
+
+        return mapOf(
+            "total" to raffleRepository.count(),
+            "open" to raffleRepository.countByStatus(RaffleStatus.OPEN),
+            "closed" to raffleRepository.countByStatus(RaffleStatus.CLOSED),
+            "completed" to raffleRepository.countByStatus(RaffleStatus.COMPLETED),
+            "cancelled" to raffleRepository.countByStatus(RaffleStatus.CANCELLED),
+            "totalParticipants" to participantRepository.count(),
+            "totalWinners" to winnerRepository.count(),
+            "verifiedWinners" to winnerRepository.countByVerifiedTrue(),
+            "unclaimedPrizes" to winnerRepository.countByPrizeClaimedFalse()
+        )
     }
 }

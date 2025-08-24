@@ -6,7 +6,7 @@ import com.gasolinerajsm.coupon.dto.GenerateQRRequest
 import com.gasolinerajsm.coupon.dto.ScanQRRequest
 import com.gasolinerajsm.coupon.dto.ActivateCouponRequest
 import com.gasolinerajsm.coupon.repository.QRCouponRepository
-import org.springframework.amqp.rabbit.core.RabbitTemplate
+// import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,7 +20,6 @@ class QRCouponService(
     private val couponRepository: QRCouponRepository,
     private val qrCodeGenerator: QRCodeGenerator,
     private val tokenGenerator: TokenGenerator,
-    private val rabbitTemplate: RabbitTemplate,
     private val redisTemplate: RedisTemplate<String, Any>
 ) {
 
@@ -93,16 +92,17 @@ class QRCouponService(
 
         val savedCoupon = couponRepository.save(updatedCoupon)
 
-        // Publicar evento para iniciar secuencia de anuncios
-        rabbitTemplate.convertAndSend(
-            "coupon.exchange",
-            "coupon.activated",
-            mapOf(
-                "couponId" to savedCoupon.id,
-                "userId" to request.userId,
-                "baseTickets" to savedCoupon.baseTickets
-            )
-        )
+        // TODO: Publicar evento para iniciar secuencia de anuncios (RabbitMQ disabled for now)
+        // rabbitTemplate.convertAndSend(
+        //     "coupon.exchange",
+        //     "coupon.activated",
+        //     mapOf(
+        //         "couponId" to savedCoupon.id,
+        //         "userId" to request.userId,
+        //         "baseTickets" to savedCoupon.baseTickets
+        //     )
+        // )
+        println("Would publish coupon.activated event for coupon ${savedCoupon.id}")
 
         return savedCoupon
     }
@@ -120,10 +120,6 @@ class QRCouponService(
     }
 
     fun getStationStats(stationId: UUID, days: Int = 30): Map<String, Any> {
-        val startDate = LocalDateTime.now().minusDays(days.toLong())
-        val endDate = LocalDateTime.now()
-
-        val stats = couponRepository.getStationStats(startDate, endDate)
         val coupons = couponRepository.findByStationId(stationId)
 
         return mapOf(
@@ -135,9 +131,6 @@ class QRCouponService(
     }
 
     fun getEmployeeStats(employeeId: UUID, days: Int = 30): Map<String, Any> {
-        val startDate = LocalDateTime.now().minusDays(days.toLong())
-        val endDate = LocalDateTime.now()
-
         val coupons = couponRepository.findByEmployeeId(employeeId)
 
         return mapOf(

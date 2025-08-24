@@ -1,0 +1,63 @@
+{
+  "application": {
+    "shellEnvironmentResolutionTimeout": 30,
+    "autoInitializeEnvironment": true,
+    "environmentScript": ".kiro/scripts/init-environment.sh"
+  },
+  "editor": {
+    "defaultFormatter": "prettier",
+    "formatOnSave": true,
+    "autoSave": "afterDelay",
+    "autoSaveDelay": 1000
+  },
+  "terminal": {
+    "defaultProfile": "development",
+    "shellIntegration": true,
+    "environmentResolution": {
+      "timeout": 30,
+      "retries": 3,
+      "fallbackToSystem": true
+    }
+  },
+  "workspace": {
+    "monorepo": {
+      "type": "nx-gradle-hybrid",
+      "frontendRoot": "apps",
+      "backendRoot": "services",
+      "sharedRoot": "packages"
+    },
+    "autoDetectProjects": true,
+    "indexing": {
+      "enabled": true,
+      "excludePatterns": [
+        "**/node_modules/**",
+        "**/build/**",
+        "**/dist/**",
+        "**/.gradle/**",
+        "**/target/**"
+      ]
+    }
+  },
+  "development": {
+    "hotReload": true,
+    "autoRestartOnConfigChange": true,
+    "debugMode": false,
+    "logLevel": "info"
+  },
+  "integrations": {
+    "git": {
+      "autoFetch": true,
+      "showInlineBlame": false,
+      "autoStage": false
+    },
+    "docker": {
+      "autoDetectContainers": true,
+      "showContainerStatus": true
+    },
+    "mcp": {
+      "autoConnect": true,
+      "reconnectOnFailure": true,
+      "logLevel": "ERROR"
+    }
+  }
+}

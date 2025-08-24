@@ -1,12 +1,12 @@
-import
-org.springframework.boot.gradle.tasks.bundling.BootJar
+
 
 plugins {
-    id("org.springframework.boot") version "3.3.3"
-    id("io.spring.dependency-management") version "1.1.6"
-    kotlin("jvm") version "1.9.24"
-    kotlin("plugin.spring") version "1.9.24"
-    kotlin("plugin.jpa") version "1.9.24"
+    id("org.springframework.boot")
+    id("io.spring.dependency-management")
+    kotlin("jvm")
+    kotlin("plugin.spring")
+    kotlin("plugin.jpa")
+    id("org.springdoc.openapi-gradle-plugin")
 }
 
 group = "com.gasolinerajsm"
@@ -30,17 +30,25 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
 
+    // --- OpenAPI Documentation ---
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui")
+    implementation("org.springdoc:springdoc-openapi-starter-common")
+
     // --- Observabilidad (Actuator + Prometheus) ---
     implementation("org.springframework.boot:spring-boot-starter-actuator")      // NUEVO
     implementation("io.micrometer:micrometer-registry-prometheus") // NUEVO
 
     // --- OpenTelemetry Tracing ---
     implementation("io.micrometer:micrometer-tracing-bridge-brave")
-    implementation("io.micrometer:micrometer-tracing-reporter-brave")
     implementation("io.opentelemetry:opentelemetry-exporter-otlp")
 
     // --- Kafka ---
     implementation("org.springframework.kafka:spring-kafka") // NUEVO
+
+    // --- JWT ---
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
     // --- Logging ---
     implementation("net.logstash.logback:logstash-logback-encoder:7.4") // For structured JSON logging
@@ -53,10 +61,19 @@ dependencies {
     // --- Base de Datos ---
     runtimeOnly("org.postgresql:postgresql")
 
+    // --- Redis ---
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
     // --- Tests ---
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
+
+    // JUnit Platform dependencies
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 }
 
@@ -71,7 +88,14 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-tasks.getByName<BootJar>("bootJar") {
+tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
     archiveFileName.set("ad-engine.jar")
-    mainClassName = "com.gasolinerajsm.adengine.AdEngineApplicationKt"
+}
+
+// OpenAPI Configuration
+openApi {
+    apiDocsUrl.set("http://localhost:8084/v3/api-docs")
+    outputDir.set(file("$projectDir"))
+    outputFileName.set("openapi.yaml")
+    waitTimeInSeconds.set(10)
 }

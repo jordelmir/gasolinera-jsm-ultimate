@@ -1,23 +1,44 @@
-
 package com.gasolinerajsm.stationservice.repository
 
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import com.gasolinerajsm.stationservice.model.Station
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
-import com.gasolinerajsm.stationservice.controller.StationDto
 
-@Entity
-@Table(name = "stations")
-data class Station(
-    @Id
-    val id: String,
-    val name: String,
-    val location: String
-) {
-    fun toDto() = StationDto(id, name, location)
-}
-
+/**
+ * Repository interface for Station entity operations
+ */
 @Repository
-interface StationRepository : JpaRepository<Station, String>
+interface StationRepository : JpaRepository<Station, String> {
+
+    /**
+     * Find stations by status
+     */
+    fun findByStatus(status: String): List<Station>
+
+    /**
+     * Find stations by name containing (case insensitive)
+     */
+    fun findByNameContainingIgnoreCase(name: String): List<Station>
+
+    /**
+     * Find stations within a geographic radius
+     */
+    @Query("""
+        SELECT s FROM Station s
+        WHERE (6371 * acos(cos(radians(:lat)) * cos(radians(s.latitude)) *
+               cos(radians(s.longitude) - radians(:lng)) +
+               sin(radians(:lat)) * sin(radians(s.latitude)))) <= :radius
+    """)
+    fun findStationsWithinRadius(
+        @Param("lat") latitude: Double,
+        @Param("lng") longitude: Double,
+        @Param("radius") radiusKm: Double
+    ): List<Station>
+
+    /**
+     * Count active stations
+     */
+    fun countByStatus(status: String): Long
+}

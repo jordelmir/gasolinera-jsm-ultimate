@@ -1,0 +1,46 @@
+gasolinera:
+  api:
+    baseUrl: 'http://localhost'
+    timeout: PT60S # 60 seconds for development
+    retries: 1
+    auth:
+      enabled: true
+      tokenUrl: '/auth/token'
+      clientId: 'dev-client'
+      clientSecret: 'dev-secret'
+    services:
+      auth:
+        port: 8081
+        timeout: PT30S
+        retries: 1
+        enabled: true
+      station:
+        port: 8083
+        timeout: PT30S
+        retries: 1
+        enabled: true
+      coupon:
+        port: 8086
+        timeout: PT30S
+        retries: 1
+        enabled: true
+      redemption:
+        port: 8082
+        timeout: PT30S
+        retries: 1
+        enabled: true
+      adengine:
+        port: 8084
+        timeout: PT30S
+        retries: 1
+        enabled: true
+      raffle:
+        port: 8085
+        timeout: PT30S
+        retries: 1
+        enabled: true
+
+logging:
+  level:
+    com.gasolinerajsm.sdk: DEBUG
+    org.springframework.web.reactive.function.client: DEBUG

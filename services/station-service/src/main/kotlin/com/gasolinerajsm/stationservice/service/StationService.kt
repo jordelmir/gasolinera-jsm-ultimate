@@ -1,8 +1,8 @@
 package com.gasolinerajsm.stationservice.service
 
-import com.gasolinerajsm.stationservice.controller.CreateStationDto
-import com.gasolinerajsm.stationservice.controller.StationDto
-import com.gasolinerajsm.stationservice.controller.UpdateStationDto
+import com.gasolinerajsm.stationservice.dto.CreateStationDto
+import com.gasolinerajsm.stationservice.dto.StationDto
+import com.gasolinerajsm.stationservice.dto.UpdateStationDto
 import com.gasolinerajsm.stationservice.model.Station
 import com.gasolinerajsm.stationservice.repository.StationRepository
 import org.springframework.stereotype.Service

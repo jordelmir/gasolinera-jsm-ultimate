@@ -1,61 +1,158 @@
 package com.gasolinerajsm.authservice.controller
 
+import com.gasolinerajsm.authservice.application.AuthenticationUseCase
+import com.gasolinerajsm.authservice.application.RequestOtpResult
+import com.gasolinerajsm.authservice.application.VerifyOtpResult
+import com.gasolinerajsm.authservice.domain.PhoneNumber
 import com.gasolinerajsm.authservice.dto.AdminLoginRequest
 import com.gasolinerajsm.authservice.dto.OtpRequest
 import com.gasolinerajsm.authservice.dto.OtpVerifyRequest
 import com.gasolinerajsm.authservice.dto.TokenResponse
 import com.gasolinerajsm.authservice.service.JwtService
-import com.gasolinerajsm.authservice.service.UserService
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import org.springframework.data.redis.core.StringRedisTemplate
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
-import java.util.concurrent.TimeUnit
 import org.slf4j.LoggerFactory
 import org.springframework.core.env.Environment
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
 
+/**
+ * REST controller for authentication endpoints.
+ * This controller acts as an adapter in the hexagonal architecture,
+ * translating HTTP requests to use case calls.
+ */
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Authentication", description = "Authentication and authorization endpoints")
 class AuthController(
-    private val jwtService: JwtService,
-    private val redisTemplate: StringRedisTemplate,
-    private val userService: UserService,
+    private val authenticationUseCase: AuthenticationUseCase,
+    private val jwtService: JwtService, // TODO: Remove when admin login is refactored
     private val env: Environment
 ) {
 
     private val logger = LoggerFactory.getLogger(AuthController::class.java)
 
-    @PostMapping("/otp/request")
-    fun requestOtp(@Valid @RequestBody request: OtpRequest): ResponseEntity<Void> {
-        val otpCode = (100000..999999).random().toString() // Generate 6-digit code
-        redisTemplate.opsForValue().set(request.phone, otpCode, 5, TimeUnit.MINUTES) // Store for 5 mins
-        logger.info("OTP requested for phone {}") // For manual testing
-        return ResponseEntity.ok().build()
-    }
+    @Operation(
+        summary = "Request OTP",
+        description = "Generates and sends a 6-digit OTP code to the provided phone number"
+    )
+    @ApiResponses(value = [
+        ApiResponse(
+            responseCode = "200",
+            description = "OTP sent successfully"
+        ),
+        ApiResponse(
+            responseCode = "400",
+            description = "Invalid phone number format",
+            content = [Content(schema = Schema(implementation = Map::class))]
+        )
+    ])
+    @PostMapping("/otp/request", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun requestOtp(
+        @Parameter(description = "Phone number to send OTP to", required = true)
+        @Valid @RequestBody request: OtpRequest
+    ): ResponseEntity<Any> {
+        return try {
+            val phoneNumber = PhoneNumber(request.phone)
+            val result = authenticationUseCase.requestOtp(phoneNumber)
 
-    @PostMapping("/otp/verify")
-    fun verifyOtp(@Valid @RequestBody request: OtpVerifyRequest): ResponseEntity<Any> {
-        val storedOtp = redisTemplate.opsForValue().get(request.phone)
-
-        if (storedOtp == null || storedOtp != request.code) {
-            logger.warn("OTP verification failed for phone {}: Invalid or expired OTP", request.phone)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf("message" to "Invalid OTP"))
+            when (result) {
+                is RequestOtpResult.Success -> ResponseEntity.ok().build()
+                is RequestOtpResult.Error -> ResponseEntity.badRequest()
+                    .body(mapOf("message" to result.message))
+            }
+        } catch (e: IllegalArgumentException) {
+            logger.warn("Invalid phone number format: {}", request.phone)
+            ResponseEntity.badRequest()
+                .body(mapOf("message" to "Invalid phone number format"))
         }
-
-        redisTemplate.delete(request.phone)
-        logger.info("OTP verified successfully for phone {}", request.phone)
-
-        val user = userService.findOrCreateUser(request.phone)
-        val accessToken = jwtService.generateAccessToken(user.id)
-        val refreshToken = jwtService.generateRefreshToken(user.id)
-
-        logger.info("Tokens generated for user ID {}", user.id)
-        return ResponseEntity.ok(TokenResponse(accessToken, refreshToken))
     }
 
-    @PostMapping("/login/admin")
-    fun adminLogin(@Valid @RequestBody request: AdminLoginRequest): ResponseEntity<Any> {
+    @Operation(
+        summary = "Verify OTP",
+        description = "Verifies the OTP code and returns JWT tokens for authentication"
+    )
+    @ApiResponses(value = [
+        ApiResponse(
+            responseCode = "200",
+            description = "OTP verified successfully, tokens returned",
+            content = [Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = Schema(implementation = TokenResponse::class)
+            )]
+        ),
+        ApiResponse(
+            responseCode = "401",
+            description = "Invalid or expired OTP",
+            content = [Content(schema = Schema(implementation = Map::class))]
+        ),
+        ApiResponse(
+            responseCode = "400",
+            description = "Invalid request format",
+            content = [Content(schema = Schema(implementation = Map::class))]
+        )
+    ])
+    @PostMapping("/otp/verify", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun verifyOtp(
+        @Parameter(description = "OTP verification request with phone and code", required = true)
+        @Valid @RequestBody request: OtpVerifyRequest
+    ): ResponseEntity<Any> {
+        return try {
+            val phoneNumber = PhoneNumber(request.phone)
+            val result = authenticationUseCase.verifyOtpAndAuthenticate(phoneNumber, request.code)
+
+            when (result) {
+                is VerifyOtpResult.Success -> {
+                    ResponseEntity.ok(TokenResponse(result.accessToken, result.refreshToken))
+                }
+                is VerifyOtpResult.InvalidOtp -> {
+                    ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(mapOf("message" to "Invalid or expired OTP"))
+                }
+                is VerifyOtpResult.Error -> {
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(mapOf("message" to result.message))
+                }
+            }
+        } catch (e: IllegalArgumentException) {
+            logger.warn("Invalid phone number format: {}", request.phone)
+            ResponseEntity.badRequest()
+                .body(mapOf("message" to "Invalid phone number format"))
+        }
+    }
+
+    @Operation(
+        summary = "Admin Login",
+        description = "Authenticates admin users with email and password"
+    )
+    @ApiResponses(value = [
+        ApiResponse(
+            responseCode = "200",
+            description = "Admin authenticated successfully",
+            content = [Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = Schema(implementation = TokenResponse::class)
+            )]
+        ),
+        ApiResponse(
+            responseCode = "401",
+            description = "Invalid admin credentials",
+            content = [Content(schema = Schema(implementation = Map::class))]
+        )
+    ])
+    @PostMapping("/login/admin", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun adminLogin(
+        @Parameter(description = "Admin login credentials", required = true)
+        @Valid @RequestBody request: AdminLoginRequest
+    ): ResponseEntity<Any> {
         // HARDCODED credentials for now as per requirements
         val adminEmail = env.getProperty("app.auth.admin-email", "admin@puntog.com")
         val adminPass = env.getProperty("app.auth.admin-password", "admin123")
@@ -74,8 +171,30 @@ class AuthController(
         return ResponseEntity.ok(TokenResponse(accessToken, refreshToken))
     }
 
-    @PostMapping("/login/advertiser")
-    fun advertiserLogin(@Valid @RequestBody request: AdminLoginRequest): ResponseEntity<Any> {
+    @Operation(
+        summary = "Advertiser Login",
+        description = "Authenticates advertiser users with email and password"
+    )
+    @ApiResponses(value = [
+        ApiResponse(
+            responseCode = "200",
+            description = "Advertiser authenticated successfully",
+            content = [Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = Schema(implementation = TokenResponse::class)
+            )]
+        ),
+        ApiResponse(
+            responseCode = "401",
+            description = "Invalid advertiser credentials",
+            content = [Content(schema = Schema(implementation = Map::class))]
+        )
+    ])
+    @PostMapping("/login/advertiser", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun advertiserLogin(
+        @Parameter(description = "Advertiser login credentials", required = true)
+        @Valid @RequestBody request: AdminLoginRequest
+    ): ResponseEntity<Any> {
         // In a real system, this would check the advertiser table
         val advertiserEmail = env.getProperty("app.auth.advertiser-email", "anunciante@tosty.com")
         val advertiserPass = env.getProperty("app.auth.advertiser-password", "tosty123")
