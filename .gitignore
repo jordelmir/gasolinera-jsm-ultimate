@@ -113,9 +113,8 @@ backups/
 *.sqlite
 *.sqlite3
 
-
-
-
+# Kiro IDE settings (may contain sensitive tokens)
+.kiro/settings/mcp.json
 
 .nx/cache
 .nx/workspace-data
