@@ -5,25 +5,25 @@ plugins {
     id("io.spring.dependency-management")
     kotlin("jvm")
     kotlin("plugin.spring")
-    // id("io.gitlab.arturbosch.detekt") // Temporarily disabled due to version conflicts
     id("org.springdoc.openapi-gradle-plugin")
 }
 
-detekt {
-    toolVersion = "1.23.4"
-    buildUponDefaultConfig = true
-    allRules = false
-    baseline = file("detekt-baseline.xml")
-}
+// Detekt configuration disabled temporarily due to version conflicts
+// detekt {
+//     toolVersion = "1.23.4"
+//     buildUponDefaultConfig = true
+//     allRules = false
+//     baseline = file("detekt-baseline.xml")
+// }
 
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    reports {
-        xml.required.set(true)
-        html.required.set(true)
-        txt.required.set(false)
-        sarif.required.set(false)
-    }
-}
+// tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+//     reports {
+//         xml.required.set(true)
+//         html.required.set(true)
+//         txt.required.set(false)
+//         sarif.required.set(false)
+//     }
+// }
 
 group = "com.gasolinerajsm"
 version = "0.0.1-SNAPSHOT"
@@ -39,7 +39,7 @@ repositories {
 }
 
 dependencies {
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.7") // Detekt formatting rules
+    // detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.7") // Detekt formatting rules - disabled
     // --- Spring Boot Starters ---
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")

@@ -5,21 +5,17 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.spring")
     kotlin("plugin.jpa")
-    id("io.gitlab.arturbosch.detekt")
+    // id("io.gitlab.arturbosch.detekt") // Temporarily disabled
     id("org.springdoc.openapi-gradle-plugin")
 }
 
-detekt {
-    toolVersion = "1.23.4"
-    buildUponDefaultConfig = true
-    allRules = false
-    baseline = file("detekt-baseline.xml")
-}
-
-// Disable detekt temporarily to fix compilation issues
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    enabled = false
-}
+// Detekt configuration disabled temporarily due to version conflicts
+// detekt {
+//     toolVersion = "1.23.4"
+//     buildUponDefaultConfig = true
+//     allRules = false
+//     baseline = file("detekt-baseline.xml")
+// }
 
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     reports {
@@ -44,7 +40,7 @@ repositories {
 }
 
 dependencies {
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.7") // Detekt formatting rules
+    // detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.7") // Detekt formatting rules - disabled
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.cloud:spring-cloud-starter-vault-config:4.1.3")
