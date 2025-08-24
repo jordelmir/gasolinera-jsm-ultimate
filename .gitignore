@@ -115,6 +115,7 @@ backups/
 
 # Kiro IDE settings (may contain sensitive tokens)
 .kiro/settings/mcp.json
+.kiro/settings/
 
 .nx/cache
 .nx/workspace-data
