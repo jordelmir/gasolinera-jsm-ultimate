@@ -16,7 +16,15 @@
     "affected:test": "nx affected --target=test",
     "affected:build": "nx affected --target=build",
     "graph": "nx graph",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "test:backend": "./gradlew test",
+    "test:backend:coverage": "./gradlew test jacocoTestReport",
+    "test:e2e": "nx run-many --target=e2e --all",
+    "test:all": "npm run test:backend && npm run test:unit && npm run test:e2e"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.6.0",
@@ -44,19 +52,25 @@
     "@nx/js": "19.2.2",
     "@nx/next": "^19.8.14",
     "@nx/workspace": "19.2.2",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "18.19.33",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
+    "@vitest/ui": "^3.2.4",
     "autoprefixer": "10.4.19",
     "eslint": "~8.57.0",
     "eslint-config-next": "14.2.3",
     "husky": "^8.0.3",
+    "jsdom": "^26.1.0",
     "lint-staged": "^13.2.3",
     "nx": "21.4.0",
     "postcss": "8.4.38",
     "prettier": "^3.0.0",
     "tailwindcss": "3.4.3",
-    "typescript": "~5.4.5"
+    "typescript": "~5.4.5",
+    "vitest": "^3.2.4"
   },
   "overrides": {
     "react": "18.3.1",

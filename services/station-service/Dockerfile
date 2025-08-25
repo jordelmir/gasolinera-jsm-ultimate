@@ -13,7 +13,7 @@ RUN gradle :services:station-service:dependencies
 COPY . .
 
 # Construir la aplicación
-RUN gradle :services:station-service:build -x test -x detekt
+RUN gradle :services:station-service:build -x test
 
 # Etapa 2: Producción
 FROM openjdk:17-alpine

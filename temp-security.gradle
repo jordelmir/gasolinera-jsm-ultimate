@@ -1,0 +1,12 @@
+
+        // Temporary security analysis
+        plugins {
+            id 'org.owasp.dependencycheck' version '8.4.0'
+        }
+
+        dependencyCheck {
+            format = 'ALL'
+            suppressionFile = 'owasp-suppressions.xml'
+            failBuildOnCVSS = 7.0
+        }
+        

@@ -49,6 +49,12 @@ services:
     cap_add:
       - IPC_LOCK
     command: 'server -dev -dev-root-token-id=myroottoken -dev-listen-address=0.0.0.0:8200'
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:8200/v1/sys/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   debezium-connect:
     image: debezium/connect:2.5
@@ -82,8 +88,8 @@ services:
         condition: service_healthy
       ad-engine:
         condition: service_healthy
-      # raffle-service:
-      #   condition: service_healthy
+      raffle-service:
+        condition: service_healthy
       jaeger:
         condition: service_started
       vault:
@@ -121,6 +127,13 @@ services:
       - vault
     environment:
       - VAULT_TOKEN=myroottoken
+      - JAVA_OPTS=${JAVA_OPTS}
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/actuator/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   redemption-service:
     build:
@@ -137,18 +150,34 @@ services:
       - vault
     environment:
       - VAULT_TOKEN=myroottoken
+      - JAVA_OPTS=${JAVA_OPTS}
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/actuator/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   station-service:
     build:
       context: .
       dockerfile: services/station-service/Dockerfile
     container_name: station-service
+    ports:
+      - '8083:8080'
     depends_on:
       - postgres
       - jaeger
       - vault
     environment:
       - VAULT_TOKEN=myroottoken
+      - JAVA_OPTS=${JAVA_OPTS}
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/actuator/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   ad-engine:
     build:
@@ -163,20 +192,34 @@ services:
       - vault
     environment:
       - VAULT_TOKEN=myroottoken
+      - JAVA_OPTS=${JAVA_OPTS}
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/actuator/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  # raffle-service:
-  #   build:
-  #     context: .
-  #     dockerfile: services/raffle-service/Dockerfile
-  #   container_name: raffle-service
-  #   ports:
-  #     - '8085:8080'
-  #   depends_on:
-  #     - postgres
-  #     - jaeger
-  #     - vault
-  #   environment:
-  #     - VAULT_TOKEN=myroottoken
+  raffle-service:
+    build:
+      context: .
+      dockerfile: services/raffle-service/Dockerfile
+    container_name: raffle-service
+    ports:
+      - '8085:8080'
+    depends_on:
+      - postgres
+      - jaeger
+      - vault
+    environment:
+      - VAULT_TOKEN=myroottoken
+      - JAVA_OPTS=${JAVA_OPTS}
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/actuator/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   coupon-service:
     build:

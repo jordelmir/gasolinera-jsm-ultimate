@@ -88,6 +88,11 @@ check-deps:
 	@echo "Checking for outdated dependencies..."
 	npm outdated
 
+# Environment validation
+ops\:env\:validate:
+	@echo "Validating environment configuration..."
+	./ops/scripts/validate-env.sh
+
 # Mobile development
 client-mobile:
 	@echo "Starting client mobile app..."
