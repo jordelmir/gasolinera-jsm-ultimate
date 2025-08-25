@@ -4,7 +4,7 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.spring")
     kotlin("plugin.jpa")
-    id("io.gitlab.arturbosch.detekt")
+    // id("io.gitlab.arturbosch.detekt") // Disabled due to version conflicts
     id("org.springdoc.openapi-gradle-plugin")
 }
 
