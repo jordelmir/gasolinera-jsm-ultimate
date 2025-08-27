@@ -3,6 +3,9 @@ package com.gasolinerajsm.coupon.controller
 import com.gasolinerajsm.coupon.dto.*
 import com.gasolinerajsm.coupon.service.QRCouponService
 import com.gasolinerajsm.coupon.service.QRCodeGenerator
+import jakarta.validation.Valid
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -17,7 +20,7 @@ class QRCouponController(
 
     @PostMapping("/generate")
     @PreAuthorize("hasRole('EMPLOYEE') or hasRole('OWNER')")
-    fun generateQRCoupon(@RequestBody request: GenerateQRRequest): ResponseEntity<GenerateQRResponse> {
+    fun generateQRCoupon(@Valid @RequestBody request: GenerateQRRequest): ResponseEntity<GenerateQRResponse> {
         val coupon = couponService.generateQRCoupon(request)
         val qrImage = qrCodeGenerator.generateQRImage(coupon.qrCode)
         val qrImageBase64 = Base64.getEncoder().encodeToString(qrImage)
@@ -36,7 +39,7 @@ class QRCouponController(
 
     @PostMapping("/scan")
     @PreAuthorize("hasRole('CLIENT')")
-    fun scanQRCoupon(@RequestBody request: ScanQRRequest): ResponseEntity<ScanQRResponse> {
+    fun scanQRCoupon(@Valid @RequestBody request: ScanQRRequest): ResponseEntity<ScanQRResponse> {
         val coupon = couponService.scanQRCoupon(request)
 
         val response = ScanQRResponse(
@@ -52,7 +55,7 @@ class QRCouponController(
 
     @PostMapping("/activate")
     @PreAuthorize("hasRole('CLIENT')")
-    fun activateCoupon(@RequestBody request: ActivateCouponRequest): ResponseEntity<ActivateCouponResponse> {
+    fun activateCoupon(@Valid @RequestBody request: ActivateCouponRequest): ResponseEntity<ActivateCouponResponse> {
         val coupon = couponService.activateCoupon(request)
 
         val response = ActivateCouponResponse(
@@ -68,11 +71,14 @@ class QRCouponController(
 
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasRole('CLIENT') and #userId == authentication.principal.id")
-    fun getUserCoupons(@PathVariable userId: UUID): ResponseEntity<UserTicketsResponse> {
-        val coupons = couponService.getUserCoupons(userId)
+    fun getUserCoupons(
+        @PathVariable userId: UUID,
+        @PageableDefault(size = 20, sort = ["createdAt"]) pageable: Pageable
+    ): ResponseEntity<UserTicketsResponse> {
+        val couponsPage = couponService.getUserCoupons(userId, pageable)
         val totalTickets = couponService.getUserActiveTickets(userId)
 
-        val couponDetails = coupons.map { coupon ->
+        val couponDetails = couponsPage.content.map { coupon ->
             CouponDetailsResponse(
                 id = coupon.id,
                 token = coupon.token,

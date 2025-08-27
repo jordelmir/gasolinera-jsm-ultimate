@@ -10,9 +10,20 @@ import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
+import com.gasolinerajsm.coupon.config.CouponProperties
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.client.j2se.MatrixToImageWriter
+import com.google.zxing.common.BitMatrix
+import com.google.zxing.qrcode.QRCodeWriter
+import org.springframework.stereotype.Service
+import java.io.ByteArrayOutputStream
+import java.util.*
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
+
 @Service
 class QRCodeGenerator(
-    private val qrSignatureSecret: String = System.getenv("QR_SIGNATURE_SECRET") ?: "default-secret"
+    private val couponProperties: CouponProperties
 ) {
 
     fun generateQRCode(token: String): String {
@@ -57,7 +68,7 @@ class QRCodeGenerator(
 
     private fun generateSignature(payload: String): String {
         val mac = Mac.getInstance("HmacSHA256")
-        val secretKey = SecretKeySpec(qrSignatureSecret.toByteArray(), "HmacSHA256")
+        val secretKey = SecretKeySpec(couponProperties.qrSignatureSecret.toByteArray(), "HmacSHA256")
         mac.init(secretKey)
 
         val hash = mac.doFinal(payload.toByteArray())

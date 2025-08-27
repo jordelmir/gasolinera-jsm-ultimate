@@ -8,6 +8,7 @@ import com.gasolinerajsm.authservice.dto.AdminLoginRequest
 import com.gasolinerajsm.authservice.dto.OtpRequest
 import com.gasolinerajsm.authservice.dto.OtpVerifyRequest
 import com.gasolinerajsm.authservice.dto.TokenResponse
+import com.gasolinerajsm.authservice.service.AuthService
 import com.gasolinerajsm.authservice.service.JwtService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.*
 @Tag(name = "Authentication", description = "Authentication and authorization endpoints")
 class AuthController(
     private val authenticationUseCase: AuthenticationUseCase,
+    private val authService: AuthService,
     private val jwtService: JwtService, // TODO: Remove when admin login is refactored
     private val env: Environment
 ) {
@@ -211,5 +213,123 @@ class AuthController(
 
         logger.info("Advertiser tokens generated for advertiser ID {}", advertiserId)
         return ResponseEntity.ok(TokenResponse(accessToken, refreshToken))
+    }
+
+    @Operation(
+        summary = "Revoke Token",
+        description = "Revokes a specific JWT token by adding it to the blacklist. Can be used to invalidate compromised tokens."
+    )
+    @ApiResponses(value = [
+        ApiResponse(
+            responseCode = "200",
+            description = "Token revoked successfully"
+        ),
+        ApiResponse(
+            responseCode = "400",
+            description = "Invalid token format or missing token",
+            content = [Content(schema = Schema(implementation = Map::class))]
+        ),
+        ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized - invalid or expired token",
+            content = [Content(schema = Schema(implementation = Map::class))]
+        )
+    ])
+    @PostMapping("/revoke", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun revokeToken(
+        @Parameter(description = "Authorization header with Bearer token to revoke", required = true)
+        @RequestHeader("Authorization") authHeader: String
+    ): ResponseEntity<Any> {
+        return try {
+            if (!authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.badRequest()
+                    .body(mapOf("message" to "Invalid authorization header format. Use 'Bearer <token>'"))
+            }
+
+            val token = authHeader.substring(7) // Remove "Bearer " prefix
+
+            if (token.isBlank()) {
+                return ResponseEntity.badRequest()
+                    .body(mapOf("message" to "Token cannot be empty"))
+            }
+
+            // Validate token before revoking to ensure it's a valid JWT
+            if (!jwtService.validateToken(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(mapOf("message" to "Invalid or expired token"))
+            }
+
+            authService.revokeToken(token)
+
+            logger.info("Token revoked successfully")
+            ResponseEntity.ok(mapOf("message" to "Token revoked successfully"))
+        } catch (e: IllegalArgumentException) {
+            logger.warn("Token revocation failed - invalid token: {}", e.message)
+            ResponseEntity.badRequest()
+                .body(mapOf("message" to "Invalid token format"))
+        } catch (e: Exception) {
+            logger.error("Token revocation failed: {}", e.message)
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(mapOf("message" to "Token revocation failed"))
+        }
+    }
+
+    @Operation(
+        summary = "Logout",
+        description = "Revokes the provided JWT token by adding it to the blacklist and logs out the user"
+    )
+    @ApiResponses(value = [
+        ApiResponse(
+            responseCode = "200",
+            description = "Logged out successfully"
+        ),
+        ApiResponse(
+            responseCode = "400",
+            description = "Invalid token format",
+            content = [Content(schema = Schema(implementation = Map::class))]
+        ),
+        ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized - invalid or expired token",
+            content = [Content(schema = Schema(implementation = Map::class))]
+        )
+    ])
+    @PostMapping("/logout", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun logout(
+        @Parameter(description = "Authorization header with Bearer token", required = true)
+        @RequestHeader("Authorization") authHeader: String
+    ): ResponseEntity<Any> {
+        return try {
+            if (!authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.badRequest()
+                    .body(mapOf("message" to "Invalid authorization header format. Use 'Bearer <token>'"))
+            }
+
+            val token = authHeader.substring(7) // Remove "Bearer " prefix
+
+            if (token.isBlank()) {
+                return ResponseEntity.badRequest()
+                    .body(mapOf("message" to "Token cannot be empty"))
+            }
+
+            // Validate token before revoking
+            if (!jwtService.validateToken(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(mapOf("message" to "Invalid or expired token"))
+            }
+
+            authService.revokeToken(token)
+
+            logger.info("User logged out successfully")
+            ResponseEntity.ok(mapOf("message" to "Logged out successfully"))
+        } catch (e: IllegalArgumentException) {
+            logger.warn("Logout failed - invalid token: {}", e.message)
+            ResponseEntity.badRequest()
+                .body(mapOf("message" to "Invalid token format"))
+        } catch (e: Exception) {
+            logger.error("Logout failed: {}", e.message)
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(mapOf("message" to "Logout failed"))
+        }
     }
 }

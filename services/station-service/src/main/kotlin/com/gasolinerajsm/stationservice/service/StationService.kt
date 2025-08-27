@@ -40,13 +40,15 @@ class StationService(private val stationRepository: StationRepository) {
         val existingStation = stationRepository.findById(id)
             .orElseThrow { RuntimeException("Station with id $id not found") }
 
-        existingStation.name = stationDto.name ?: existingStation.name
-        existingStation.latitude = stationDto.latitude ?: existingStation.latitude
-        existingStation.longitude = stationDto.longitude ?: existingStation.longitude
-        existingStation.status = stationDto.status ?: existingStation.status
+        val updatedStation = existingStation.copy(
+            name = stationDto.name ?: existingStation.name,
+            latitude = stationDto.latitude ?: existingStation.latitude,
+            longitude = stationDto.longitude ?: existingStation.longitude,
+            status = stationDto.status ?: existingStation.status
+        )
 
-        val updatedStation = stationRepository.save(existingStation)
-        return updatedStation.toDto()
+        val savedStation = stationRepository.save(updatedStation)
+        return savedStation.toDto()
     }
 
     @Transactional

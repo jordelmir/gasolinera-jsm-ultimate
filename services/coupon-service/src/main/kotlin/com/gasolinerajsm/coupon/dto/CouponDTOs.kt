@@ -1,12 +1,19 @@
 package com.gasolinerajsm.coupon.dto
 
 import com.gasolinerajsm.coupon.domain.CouponStatus
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.NotNull
 import java.time.LocalDateTime
 import java.util.*
 
 data class GenerateQRRequest(
+    @field:NotNull(message = "El ID de la estación no puede ser nulo")
     val stationId: UUID,
+
+    @field:NotNull(message = "El ID del empleado no puede ser nulo")
     val employeeId: UUID,
+
+    @field:Min(value = 1, message = "El monto debe ser al menos 1 (múltiplo de ₡5,000)")
     val amount: Int // Múltiplos de 5000
 )
 
@@ -20,7 +27,10 @@ data class GenerateQRResponse(
 )
 
 data class ScanQRRequest(
+    @field:NotNull(message = "El código QR no puede ser nulo")
     val qrCode: String,
+
+    @field:NotNull(message = "El ID del usuario no puede ser nulo")
     val userId: UUID
 )
 
@@ -33,7 +43,10 @@ data class ScanQRResponse(
 )
 
 data class ActivateCouponRequest(
+    @field:NotNull(message = "El ID del cupón no puede ser nulo")
     val couponId: UUID,
+
+    @field:NotNull(message = "El ID del usuario no puede ser nulo")
     val userId: UUID
 )
 
