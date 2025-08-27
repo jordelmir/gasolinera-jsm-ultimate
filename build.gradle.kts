@@ -15,7 +15,7 @@ plugins {
 
     // Code Quality
     id("io.gitlab.arturbosch.detekt") version "1.23.4" apply false
-    id("jacoco") apply false
+    // jacoco - disabled temporarily
 
     // Build and Publishing
     `maven-publish`

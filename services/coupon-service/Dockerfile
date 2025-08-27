@@ -1,7 +1,8 @@
 FROM gradle:8.8-jdk17 AS build
 
 WORKDIR /app
-COPY build.gradle.kts settings.gradle.kts ./
+COPY build.gradle.kts settings.gradle.kts gradle.properties ./
+COPY gradle ./gradle
 COPY services/coupon-service/build.gradle.kts ./services/coupon-service/
 COPY services/coupon-service/src ./services/coupon-service/src
 

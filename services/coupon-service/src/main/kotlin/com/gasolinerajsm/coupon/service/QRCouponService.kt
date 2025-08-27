@@ -1,5 +1,6 @@
 package com.gasolinerajsm.coupon.service
 
+import com.gasolinerajsm.coupon.config.CouponProperties
 import com.gasolinerajsm.coupon.domain.CouponStatus
 import com.gasolinerajsm.coupon.domain.QRCoupon
 import com.gasolinerajsm.coupon.dto.GenerateQRRequest
@@ -7,6 +8,8 @@ import com.gasolinerajsm.coupon.dto.ScanQRRequest
 import com.gasolinerajsm.coupon.dto.ActivateCouponRequest
 import com.gasolinerajsm.coupon.repository.QRCouponRepository
 // import org.springframework.amqp.rabbit.core.RabbitTemplate
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,10 +23,17 @@ class QRCouponService(
     private val couponRepository: QRCouponRepository,
     private val qrCodeGenerator: QRCodeGenerator,
     private val tokenGenerator: TokenGenerator,
-    private val redisTemplate: RedisTemplate<String, Any>
+    private val redisTemplate: RedisTemplate<String, Any>,
+    private val couponProperties: CouponProperties
 ) {
 
     fun generateQRCoupon(request: GenerateQRRequest): QRCoupon {
+        // Validación adicional de negocio
+        require(request.amount > 0) { "El monto debe ser positivo" }
+        require(request.amount <= couponProperties.maxTicketsPerCoupon) {
+            "El monto no puede exceder ${couponProperties.maxTicketsPerCoupon} tickets"
+        }
+
         val token = tokenGenerator.generateUniqueToken()
         val qrCode = qrCodeGenerator.generateQRCode(token)
         val baseTickets = request.amount // 1 ticket por cada múltiplo de 5000
@@ -36,7 +46,7 @@ class QRCouponService(
             amount = request.amount,
             baseTickets = baseTickets,
             totalTickets = baseTickets,
-            expiresAt = LocalDateTime.now().plusHours(24) // Expira en 24 horas
+            expiresAt = LocalDateTime.now().plusHours(couponProperties.expirationHours)
         )
 
         val savedCoupon = couponRepository.save(coupon)
@@ -45,7 +55,7 @@ class QRCouponService(
         redisTemplate.opsForValue().set(
             "qr:${qrCode}",
             savedCoupon.id.toString(),
-            24,
+            couponProperties.expirationHours,
             TimeUnit.HOURS
         )
 
@@ -53,7 +63,8 @@ class QRCouponService(
     }
 
     fun scanQRCoupon(request: ScanQRRequest): QRCoupon {
-        val coupon = couponRepository.findByQrCode(request.qrCode)
+        // Usar lock pessimistic para prevenir race conditions
+        val coupon = couponRepository.findAndLockByQrCode(request.qrCode)
             ?: throw IllegalArgumentException("QR Code no válido")
 
         if (coupon.status != CouponStatus.GENERATED) {
@@ -107,8 +118,8 @@ class QRCouponService(
         return savedCoupon
     }
 
-    fun getUserCoupons(userId: UUID): List<QRCoupon> {
-        return couponRepository.findByScannedBy(userId)
+    fun getUserCoupons(userId: UUID, pageable: Pageable): Page<QRCoupon> {
+        return couponRepository.findByScannedBy(userId, pageable)
     }
 
     fun getUserActiveTickets(userId: UUID): Int {
@@ -120,26 +131,24 @@ class QRCouponService(
     }
 
     fun getStationStats(stationId: UUID, days: Int = 30): Map<String, Any> {
-        val coupons = couponRepository.findByStationId(stationId)
+        val stats = couponRepository.getStationStatsOptimized(stationId)
 
         return mapOf(
-            "totalCoupons" to coupons.size,
-            "totalTickets" to coupons.sumOf { it.totalTickets },
-            "activeCoupons" to coupons.count { it.status in listOf(CouponStatus.ACTIVATED, CouponStatus.COMPLETED) },
-            "expiredCoupons" to coupons.count { it.status == CouponStatus.EXPIRED }
+            "totalCoupons" to (stats[0] as Long).toInt(),
+            "totalTickets" to (stats[1] as Long).toInt(),
+            "activeCoupons" to (stats[2] as Long).toInt(),
+            "expiredCoupons" to (stats[3] as Long).toInt()
         )
     }
 
     fun getEmployeeStats(employeeId: UUID, days: Int = 30): Map<String, Any> {
-        val coupons = couponRepository.findByEmployeeId(employeeId)
+        val stats = couponRepository.getEmployeeStatsOptimized(employeeId)
 
         return mapOf(
-            "totalCoupons" to coupons.size,
-            "totalTickets" to coupons.sumOf { it.totalTickets },
-            "scannedCoupons" to coupons.count { it.scannedBy != null },
-            "conversionRate" to if (coupons.isNotEmpty()) {
-                (coupons.count { it.scannedBy != null }.toDouble() / coupons.size * 100)
-            } else 0.0
+            "totalCoupons" to (stats[0] as Long).toInt(),
+            "totalTickets" to (stats[1] as Long).toInt(),
+            "scannedCoupons" to (stats[2] as Long).toInt(),
+            "conversionRate" to (stats[3] as Double)
         )
     }
 }

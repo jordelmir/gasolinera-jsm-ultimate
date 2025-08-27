@@ -28,9 +28,28 @@ app:
     expirationMs: 900000 # 15 minutes
     refreshExpirationMs: 604800000 # 7 days
   otp:
+    # OTP Generation Configuration
     provider: ${OTP_PROVIDER:mock}
-    length: 6
-    expiration-minutes: 5
+    length: ${OTP_LENGTH:6} # Length of OTP code (4-8 digits recommended)
+    expiration-minutes: ${OTP_EXPIRATION:5} # OTP validity period in minutes
+    min-value: ${OTP_MIN_VALUE:100000} # Minimum OTP value (ensures consistent length)
+    max-value: ${OTP_MAX_VALUE:999999} # Maximum OTP value (ensures consistent length)
+
+    # Security & Rate Limiting Configuration
+    max-attempts: ${OTP_MAX_ATTEMPTS:5} # Maximum failed attempts before lockout
+    lockout-minutes: ${OTP_LOCKOUT_MINUTES:15} # Account lockout duration in minutes
+
+    # Audit Logging Configuration
+    enable-audit-logging: ${OTP_ENABLE_AUDIT:true} # Enable security audit logging
+    log-sensitive-data: ${OTP_LOG_SENSITIVE:false} # Log sensitive data (ONLY for development)
+
+  phone:
+    validation:
+      # Phone Number Validation Configuration
+      enable-international: ${PHONE_ENABLE_INTL:true} # Support E.164 international format
+      enable-local-costa-rica: ${PHONE_ENABLE_CR:true} # Support Costa Rican local formats
+      default-country-code: ${PHONE_DEFAULT_CC:"+506"} # Default country code for normalization
+
   auth:
     admin-email: ${ADMIN_EMAIL:admin@puntog.com}
     admin-password: ${ADMIN_PASSWORD:admin123}

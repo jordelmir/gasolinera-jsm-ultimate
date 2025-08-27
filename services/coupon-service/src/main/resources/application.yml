@@ -24,6 +24,10 @@ app:
     secret: ${JWT_SECRET}
   qr:
     expiration-minutes: ${QR_EXPIRATION_MINUTES:15}
+  coupon:
+    expiration-hours: ${COUPON_EXPIRATION_HOURS:24}
+    max-tickets-per-coupon: ${MAX_TICKETS_PER_COUPON:10}
+    qr-signature-secret: ${QR_SIGNATURE_SECRET:default-secret-change-in-production}
 
 management:
   endpoints:

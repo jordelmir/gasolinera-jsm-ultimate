@@ -3,7 +3,8 @@ FROM gradle:8.8.0-jdk17-alpine AS build
 WORKDIR /home/gradle/project
 
 # Copiar solo los archivos de build para cachear dependencias
-COPY build.gradle.kts settings.gradle.kts ./
+COPY build.gradle.kts settings.gradle.kts gradle.properties ./
+COPY gradle ./gradle
 COPY services/station-service/build.gradle.kts ./services/station-service/
 
 # Descargar dependencias

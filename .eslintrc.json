@@ -23,12 +23,21 @@
     },
     {
       "files": ["*.ts", "*.tsx"],
-      "extends": ["@nx/typescript"],
+      "extends": ["@typescript-eslint/recommended"],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "ecmaVersion": 2020,
+        "sourceType": "module"
+      },
       "rules": {}
     },
     {
       "files": ["*.js", "*.jsx"],
-      "extends": ["@nx/javascript"],
+      "extends": ["eslint:recommended"],
+      "parserOptions": {
+        "ecmaVersion": 2020,
+        "sourceType": "module"
+      },
       "rules": {}
     }
   ]

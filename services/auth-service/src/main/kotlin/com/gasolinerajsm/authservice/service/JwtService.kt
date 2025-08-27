@@ -5,8 +5,10 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Service
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.crypto.SecretKey
 import org.slf4j.LoggerFactory
 
@@ -20,7 +22,8 @@ import org.slf4j.LoggerFactory
 @Service
 class JwtService(
     @Value("\${app.jwt.secret}")
-    private val jwtSecret: String
+    private val jwtSecret: String,
+    private val redisTemplate: StringRedisTemplate
 ) {
 
     companion object {
@@ -30,6 +33,7 @@ class JwtService(
         private const val TOKEN_TYPE_CLAIM = "type"
         private const val ACCESS_TOKEN_TYPE = "access"
         private const val REFRESH_TOKEN_TYPE = "refresh"
+        private const val BLACKLIST_PREFIX = "jwt_blacklist:"
     }
 
     private val key: SecretKey = Keys.hmacShaKeyFor(jwtSecret.toByteArray())
@@ -95,13 +99,19 @@ class JwtService(
     }
 
     /**
-     * Validates a JWT token.
+     * Validates a JWT token and checks if it's blacklisted.
      *
      * @param token The JWT token to validate
-     * @return true if token is valid, false otherwise
+     * @return true if token is valid and not blacklisted, false otherwise
      */
     fun validateToken(token: String): Boolean {
         return try {
+            // First check if token is blacklisted
+            if (isTokenBlacklisted(token)) {
+                logger.warn("Token is blacklisted")
+                return false
+            }
+
             val claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
@@ -187,6 +197,55 @@ class JwtService(
             tokenType == expectedType
         } catch (e: Exception) {
             logger.error("Failed to check token type: {}", e.message)
+            false
+        }
+    }
+
+    /**
+     * Adds a token to the blacklist, preventing its future use.
+     * The token remains blacklisted until its natural expiration.
+     *
+     * @param token The JWT token to blacklist
+     */
+    fun blacklistToken(token: String) {
+        try {
+            val claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .body
+
+            val expiration = claims.expiration.time
+            val now = System.currentTimeMillis()
+            val ttl = expiration - now
+
+            if (ttl > 0) {
+                redisTemplate.opsForValue().set(
+                    "$BLACKLIST_PREFIX$token",
+                    "revoked",
+                    ttl,
+                    TimeUnit.MILLISECONDS
+                )
+                logger.info("Token blacklisted successfully")
+            }
+        } catch (e: Exception) {
+            logger.error("Failed to blacklist token: {}", e.message)
+            throw IllegalArgumentException("Invalid token for blacklisting", e)
+        }
+    }
+
+    /**
+     * Checks if a token is in the blacklist.
+     *
+     * @param token The JWT token to check
+     * @return true if token is blacklisted, false otherwise
+     */
+    fun isTokenBlacklisted(token: String): Boolean {
+        return try {
+            redisTemplate.hasKey("$BLACKLIST_PREFIX$token")
+        } catch (e: Exception) {
+            logger.error("Failed to check token blacklist status: {}", e.message)
+            // Fail safe: if we can't check, assume it's not blacklisted
             false
         }
     }
