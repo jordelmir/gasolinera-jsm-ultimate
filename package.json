@@ -24,7 +24,10 @@
     "test:backend": "./gradlew test",
     "test:backend:coverage": "./gradlew test jacocoTestReport",
     "test:e2e": "nx run-many --target=e2e --all",
-    "test:all": "npm run test:backend && npm run test:unit && npm run test:e2e"
+    "test:all": "npm run test:backend && npm run test:unit && npm run test:e2e",
+    "analyze": "./ops/analysis/run-analysis.sh",
+    "analyze:quick": "cd ops/analysis && npm run analyze:quick",
+    "analyze:report": "cat ops/analysis/results/analysis-report.md"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.6.0",
@@ -48,6 +51,7 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@nx/eslint": "^21.4.1",
     "@nx/eslint-plugin": "^19.2.2",
     "@nx/js": "19.2.2",
     "@nx/next": "^19.8.14",
