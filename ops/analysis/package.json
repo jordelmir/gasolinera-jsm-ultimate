@@ -1,0 +1,32 @@
+{
+  "name": "jsm-analysis-system",
+  "version": "1.0.0",
+  "description": "Comprehensive analysis system for JSM platform",
+  "main": "main-analyzer.ts",
+  "scripts": {
+    "analyze": "npx ts-node main-analyzer.ts",
+    "analyze:quick": "npx ts-node main-analyzer.ts --quick",
+    "scan": "npx ts-node codebase-scanner.ts",
+    "report": "npx ts-node -e \"console.log(require('./results/analysis-report.md'))\"",
+    "build": "npx tsc",
+    "clean": "rm -rf results/*"
+  },
+  "dependencies": {
+    "glob": "^10.3.10",
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2",
+    "@types/node": "^20.10.6"
+  },
+  "bin": {
+    "jsm-analyze": "./main-analyzer.ts"
+  },
+  "keywords": [
+    "analysis",
+    "code-quality",
+    "architecture",
+    "security",
+    "performance"
+  ],
+  "author": "JSM Development Team",
+  "license": "MIT"
+}
