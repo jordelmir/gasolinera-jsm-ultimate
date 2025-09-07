@@ -14,9 +14,10 @@ WORKDIR /app
 # Install curl for health checks
 RUN apk --no-cache add curl
 
-COPY --from=build /app/services/coupon-service/build/libs/*[!plain].jar app.jar
+# Copiar el JAR específico y ejecutable
+COPY --from=build /app/services/coupon-service/build/libs/coupon-service.jar app.jar
 
-EXPOSE 8080
+EXPOSE 8086
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8080/actuator/health || exit 1

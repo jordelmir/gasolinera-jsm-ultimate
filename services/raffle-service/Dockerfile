@@ -1,5 +1,5 @@
 # Etapa 1: Compilación
-FROM gradle:8.8.0-jdk17-alpine AS build
+FROM gradle:8.8-jdk17 AS build
 WORKDIR /home/gradle/project
 
 # Copiar solo los archivos de build para cachear dependencias
@@ -20,11 +20,11 @@ FROM openjdk:17-alpine
 
 WORKDIR /app
 
-# Copiar el JAR construido a un directorio
-COPY --from=build /home/gradle/project/services/raffle-service/build/libs/*[!plain].jar /app/
+# Copiar el JAR específico y ejecutable
+COPY --from=build /home/gradle/project/services/raffle-service/build/libs/raffle-service.jar app.jar
 
 # Exponer el puerto en el que corre la aplicación
 EXPOSE 8085
 
-# Comando para buscar y ejecutar la aplicación
-ENTRYPOINT ["sh", "-c", "java -jar /app/*[!plain].jar"]
+# Comando para ejecutar la aplicación
+ENTRYPOINT ["java", "-jar", "app.jar"]

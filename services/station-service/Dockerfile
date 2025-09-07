@@ -20,11 +20,11 @@ FROM openjdk:17-alpine
 
 WORKDIR /app
 
-# Copiar el JAR construido a un directorio
-COPY --from=build /home/gradle/project/services/station-service/build/libs/*[!plain].jar /app/
+# Copiar el JAR específico y ejecutable
+COPY --from=build /home/gradle/project/services/station-service/build/libs/station-service.jar app.jar
 
 # Exponer el puerto en el que corre la aplicación
-EXPOSE 8080
+EXPOSE 8083
 
-# Comando para buscar y ejecutar la aplicación
-ENTRYPOINT ["sh", "-c", "java -jar /app/*[!plain].jar"]
+# Comando para ejecutar la aplicación
+ENTRYPOINT ["java", "-jar", "app.jar"]

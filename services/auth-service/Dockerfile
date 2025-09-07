@@ -12,17 +12,16 @@ RUN gradle :services:auth-service:dependencies
 # Copiar el resto del código fuente
 COPY . .
 
-# Construir la aplicación y renombrar el JAR ejecutable
-RUN gradle :services:auth-service:build -x test -x detekt && \
-    find /home/gradle/project/services/auth-service/build/libs -name "*.jar" ! -name "*-plain.jar" -exec mv {} /home/gradle/project/services/auth-service/build/libs/app.jar \
+# Construir la aplicación
+RUN gradle :services:auth-service:build -x test -x detekt
 
 # Etapa 2: Producción
 FROM openjdk:17-alpine
 
 WORKDIR /app
 
-# Copiar el JAR renombrado desde la etapa de compilación
-COPY --from=build /home/gradle/project/services/auth-service/build/libs/app.jar .
+# Copiar el JAR específico y ejecutable
+COPY --from=build /home/gradle/project/services/auth-service/build/libs/auth-service.jar app.jar
 
 # Exponer el puerto en el que corre la aplicación
 EXPOSE 8081
