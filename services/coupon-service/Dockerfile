@@ -14,7 +14,7 @@ WORKDIR /app
 # Install curl for health checks
 RUN apk --no-cache add curl
 
-COPY --from=build /app/services/coupon-service/build/libs/*.jar app.jar
+COPY --from=build /app/services/coupon-service/build/libs/*[!plain].jar app.jar
 
 EXPOSE 8080
 
